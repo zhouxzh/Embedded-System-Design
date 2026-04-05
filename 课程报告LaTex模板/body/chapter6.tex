@@ -1,0 +1,92 @@
+% !Mode:: "TeX:UTF-8"
+
+\section{个人贡献}
+
+\subsection{报告撰写}
+负责项目报告的总体规划与撰写工作，包括：
+\begin{itemize}
+    \item 完成项目背景分析、技术方案论证等理论部分
+    \item 编写系统设计文档（硬件设计、软件架构）
+    \item 制作功能演示材料与测试数据分析
+    \item 整合全篇报告并进行最终排版优化
+\end{itemize}
+
+\subsection{编码工作}
+\begin{itemize}
+    \item 完成STM32系统初始化代码（时钟配置、GPIO初始化）
+    \item 实现红外遥控NEC协议解码程序（使用TIM1输入捕获）
+    \item 开发PWM调速控制算法（三档风速控制+自然风模式）
+    \item 编写定时关闭功能的状态机逻辑
+    \item 设计低功耗管理模块（STOP模式与唤醒机制）
+\end{itemize}
+
+\subsection{硬件连接}
+\begin{itemize}
+    \item 设计并搭建完整的电路系统：
+    \begin{itemize}
+        \item STM32核心板与L298N驱动模块的连接
+        \item 红外接收头与STM32的电路接口
+        \item 蜂鸣器、LED指示灯的驱动电路
+    \end{itemize}
+    \item 完成系统供电方案设计与实现：
+    \begin{itemize}
+        \item 3.3V逻辑电路供电
+        \item 12V电机驱动电路供电
+        \item 电源滤波与保护电路
+    \end{itemize}
+\end{itemize}
+
+\subsection{资本投入}
+个人承担项目全部物料采购费用，总计120.70元（详见第5章物料与成本分析），主要包括：
+\begin{itemize}
+    \item STM32核心板、L298N模块等电子元件
+    \item 12V直流风扇、电源适配器
+    \item 3D打印外壳制作费用
+    \item 损耗元件替换成本
+\end{itemize}
+
+\subsection{开发问题描述与解决方案}
+
+\subsubsection{红外信号干扰问题}
+\begin{itemize}
+    \item \textbf{问题描述：} 环境光干扰导致红外接收误触发，误码率高达30\%
+    \item \textbf{解决方案：}
+    \begin{itemize}
+        \item 增加硬件滤波：在VS1838B输出端添加0.1μF电容
+        \item 软件优化：实现两次信号校验机制
+        \item 物理屏蔽：使用黑色热缩管包裹红外接收头
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{电机启动电流冲击}
+\begin{itemize}
+    \item \textbf{问题描述：} 风扇电机启动瞬间导致系统复位（电流峰值2.8A）
+    \item \textbf{解决方案：}
+    \begin{itemize}
+        \item 硬件：在电机电源端添加2200μF电解电容缓冲
+        \item 软件：实现软启动算法（PWM占空比从0\%线性增加到目标值）
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{PWM调速不线性}
+\begin{itemize}
+    \item \textbf{问题描述：} 低占空比区间（<40\%）电机响应不灵敏
+    \item \textbf{解决方案：}
+    \begin{itemize}
+        \item 采用分段线性化校准：低档位使用30\%固定占空比
+        \item 修改PWM频率：从1kHz提高到20kHz改善低速特性
+        \item 增加启动补偿：初始0.5秒使用45\%占空比启动
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{系统待机功耗偏高}
+\begin{itemize}
+    \item \textbf{问题描述：} 待机模式实测功耗5.2mA（目标<1mA）
+    \item \textbf{解决方法：}
+    \begin{itemize}
+        \item 关闭所有未使用的外设时钟（ADC、USART等）
+        \item 配置未使用GPIO为模拟输入模式
+        \item 添加MOSFET开关电路，完全切断电机驱动模块电源
+        \item 优化后待机功耗：0.8mA（下降85\%）
+    \end{itemize}
+\end{itemize}

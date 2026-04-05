@@ -1,0 +1,74 @@
+% !TeX program = xelatex
+% FPGA课程设计报告模板
+
+\documentclass[12pt, a4paper]{ctexart}
+\usepackage{GDUTReport}
+
+% 页面布局设置
+\setstretch{1.5} % 设置全局行距为1.5倍
+
+% 字体设置
+\setmainfont{Times New Roman} % 英文正文为Times New Roman
+
+% 封面内容
+{
+    % 课程名称
+    \title{嵌入式系统课程设计报告}
+    % 报告标题
+    \subtitle{基于STM32的遥控电风扇的设计}
+    % 姓名
+    \name{阿Q}
+    % 学号
+    \thenumber{12345678}
+    % 专业
+    \major{微电子科学与工程}
+    % 班级
+    \class{微电子X班}
+    % 队名
+    \team{量子摸鱼科技}
+    % 队友名字
+    \teammate{猪队友}
+    % 指导老师
+    \teacher{周贤中}
+}
+
+\begin{document}
+
+% 封面
+\pagenumbering{gobble}
+\makecover
+
+% 前言部分
+% \frontmatter
+
+% 摘要
+\newpage
+\begin{abstract}
+本文介绍了嵌入式系统课程设计项目——基于STM32的遥控电风扇系统设计。
+利用C/C++语言进行嵌入式软件开发，设计并实现了包含电机驱动控制、红外遥控信号解码、多档位风速调节（PWM调速）、定时关闭等核心功能的系统。
+在Keil MDK或STM32CubeIDE开发环境下完成程序设计，通过STM32F1/F4系列微控制器驱动，并在实际搭建的电风扇原型硬件平台上完成功能验证与性能测试。
+项目展示了STM32微控制器在嵌入式系统设计中的高效控制能力和综合应用价值。
+\par
+\textbf{关键词：} STM32；嵌入式系统；电风扇控制；红外遥控；PWM调速\end{abstract}
+\clearpage
+
+% 目录
+\tableofcontents
+\clearpage
+
+% 正文
+\pagenumbering{arabic}
+\setcounter{page}{1} % 让页码从正文开始编号
+% \mainmatter
+
+\include{body/chapter1}
+\include{body/chapter2}
+\include{body/chapter3}
+\include{body/chapter4}
+\include{body/chapter5}
+\include{body/chapter6}
+\include{body/chapter7}
+\include{body/chapter8}
+
+
+\end{document}

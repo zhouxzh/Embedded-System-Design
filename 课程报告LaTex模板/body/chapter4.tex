@@ -1,0 +1,61 @@
+% !Mode:: "TeX:UTF-8"
+
+% !Mode:: "TeX:UTF-8"
+
+\section{功能展示}
+
+\subsection{功能描述}
+本系统实现了基于红外遥控的智能风扇控制功能，主要包括基础控制功能和增强功能两大部分。
+
+\subsubsection{基础控制功能}
+\begin{itemize}
+    \item \textbf{电源开关控制}：通过遥控器电源键实现风扇的一键开关机
+    \item \textbf{三档风速调节}：支持低、中、高三档风速控制，通过PWM占空比调节电机转速
+    \item \textbf{状态指示灯}：PG13（电源灯）、PG14（运行灯）实时反映系统状态
+\end{itemize}
+
+\subsubsection{增强功能}
+\begin{itemize}
+    \item \textbf{定时关闭功能}：支持1/2/4小时三档定时设置，定时结束自动关机
+    \item \textbf{自然风模式}：模拟自然风变化，风速在30\%-70\%范围内随机波动
+    \item \textbf{蜂鸣器反馈}：每次按键操作伴随蜂鸣提示音，增强交互体验
+    \item \textbf{低功耗待机}：待机状态功耗<1mA，红外信号唤醒系统
+\end{itemize}
+
+\subsection{演示结果}
+
+\subsubsection{基础功能测试}
+\begin{itemize}
+    \item 测试用例1：遥控开关机 - 成功响应率100\%，响应时间<50ms
+    \item 测试用例2：风速切换 - PWM占空比实测值：低档30.2\%、中档60.1\%、高档90.3\%
+\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/logo.pdf}
+    \caption{风扇三档风速控制效果（左：低速；中：中速；右：高速）}
+    \label{fig:speed_test}
+\end{figure}
+
+\subsubsection{高级功能验证}
+\begin{itemize}
+    \item 测试用例：定时功能验证 - 设置1小时定时，实际关闭时间误差<±1秒
+\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/logo.pdf}
+    \caption{定时功能验证（定时指示灯PG15亮起，倒计时显示）}
+    \label{fig:timer_test}
+\end{figure}
+
+\subsubsection{系统整体展示}
+\begin{itemize}
+    \item 整机功耗测试：满载（高档）电流1.2A，待机电流0.8mA
+    \item 遥控距离测试：有效控制距离>8米（无遮挡环境）
+    \item 温度测试：连续工作4小时，主控芯片温度<45℃
+\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/logo.pdf}
+    \caption{系统整体实现效果（含STM32主控板、驱动电路及风扇）}
+    \label{fig:full_system}
+\end{figure}

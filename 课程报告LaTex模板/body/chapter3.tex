@@ -1,0 +1,158 @@
+% !Mode:: "TeX:UTF-8"
+
+\section{项目设计与实现}
+
+\subsection{硬件设计}
+
+\subsubsection{系统总体架构}
+系统采用模块化设计，以STM32F103C8T6微控制器为核心，通过外围电路实现红外接收、电机驱动、电源管理等关键功能。系统架构如图\ref{fig:sys_arch}所示，包含主控制器模块、红外接收模块、电机驱动模块、电源模块和用户指示模块。
+
+\subsubsection{主控制器模块}
+选用STM32F103C8T6微控制器作为主控芯片，主要特性包括：
+- 72MHz Cortex-M3内核
+- 64KB Flash, 20KB SRAM
+- 3个通用定时器（TIM2/TIM3/TIM4）
+- 丰富的GPIO接口
+- 12位ADC转换器
+
+\subsubsection{红外接收模块}
+采用VS1838B红外接收头，主要特性：
+\begin{itemize}
+    \item 工作电压：2.7-5.5V
+    \item 接收频率：38kHz
+    \item 输出信号：TTL电平
+    \item 连接方式：\texttt{OUT}引脚 $\rightarrow$ \texttt{PA8}（\texttt{TIM1\_CH1}），通过定时器输入捕获功能解码信号
+\end{itemize}
+
+\subsubsection{电机驱动模块}
+\paragraph{L298N电机驱动方案}
+采用L298N双H桥驱动芯片驱动12V直流风扇电机：
+\begin{itemize}
+    \item \texttt{IN1/IN2} $\rightarrow$ \texttt{PB6/PB7}（\texttt{TIM4\_CH1/CH2}）
+    \item \texttt{ENA} $\rightarrow$ \texttt{PA6}（\texttt{TIM3\_CH1} PWM输出）
+\end{itemize}
+通过调节PWM占空比实现三档调速（低：30\%、中：60\%、高：90\%）
+
+\subsubsection{电源模块}
+设计双电源供电方案：
+- 主控电路：AMS1117-3.3V稳压芯片，输入5V→输出3.3V
+- 电机电路：LM2596降压模块，输入12V→输出12V（最大电流2A）
+- USB接口提供5V调试电源
+
+\subsubsection{用户指示模块}
+- LED状态指示：PG13（电源）、PG14（运行）、PG15（定时）
+- 蜂鸣器提示：PA0，用于按键反馈和闹钟提醒
+
+\subsection{软件设计}
+
+\subsubsection{系统软件架构}
+软件采用分层设计：
+1. 硬件抽象层（HAL）：STM32CubeMX生成的初始化代码
+2. 驱动层：红外解码、PWM输出、定时器配置
+3. 应用层：主控制逻辑、状态管理、用户接口
+
+\subsubsection{主程序流程}
+系统采用中断驱动+状态机设计：
+\begin{enumerate}
+    \item 系统初始化（时钟、GPIO、定时器、中断）
+    \item 进入主循环，检测系统状态
+    \item 红外中断服务程序处理遥控信号
+    \item 定时器中断处理PWM输出和定时功能
+    \item 更新状态指示灯
+\end{enumerate}
+
+\subsubsection{红外解码协议实现}
+使用NEC协议解码，关键参数：
+- 引导码：9ms高电平+4.5ms低电平
+- 数据码：0.56ms高电平+0.56ms/1.69ms低电平
+- 32位数据传输（地址码+命令码+反码）
+
+\begin{center}
+    \resizebox{0.95\textwidth}{!}{
+    \begin{tabular}{|l|l|l|}
+      \hline
+      \textbf{按键功能} & \textbf{红外编码值} & \textbf{系统响应} \\
+      \hline
+      电源开关 & 0x00FF6897 & 切换风扇开关状态 \\
+      \hline
+      风速+ & 0x00FF30CF & 提高风速档位（低→中→高） \\
+      \hline
+      风速- & 0x00FF7A85 & 降低风速档位（高→中→低） \\
+      \hline
+      定时1小时 & 0x00FF18E7 & 设置60分钟后自动关闭 \\
+      \hline
+      定时2小时 & 0x00FF38C7 & 设置120分钟后自动关闭 \\
+      \hline
+      定时4小时 & 0x00FF5AA5 & 设置240分钟后自动关闭 \\
+      \hline
+      取消定时 & 0x00FF4AB5 & 关闭定时器 \\
+      \hline
+      自然风模式 & 0x00FF10EF & 切换随机变速模式 \\
+      \hline
+    \end{tabular}
+    }
+  \end{center}
+
+\subsection{代码介绍}
+
+\subsubsection{初始化和配置}
+\begin{itemize}
+    \item \begin{verbatim}MX_TIM3_Init()：\end{verbatim}配置TIM3为PWM输出模式，通道1(PA6)用于电机调速
+    \item \begin{verbatim}MX_TIM1_Init()：\end{verbatim}配置TIM1为输入捕获模式，通道1(PA8)用于红外解码
+    \item \begin{verbatim}MX_GPIO_Init()：\end{verbatim}初始化LED指示灯(GPIOG)和蜂鸣器(GPIOA)
+\end{itemize}
+
+\subsubsection{主功能实现}
+\begin{itemize}
+    \item \begin{verbatim}IR_Decode()：\end{verbatim}红外解码函数，解析NEC协议数据
+    \item \begin{verbatim}Fan_Control(uint8_t speed)：\end{verbatim}风扇控制函数
+          \begin{itemize}
+              \item \begin{verbatim}Set_PWM_Duty(TIM3, duty)：\end{verbatim}设置PWM占空比
+              \item \begin{verbatim}Update_LED_Status()：\end{verbatim}更新LED状态指示
+          \end{itemize}
+    \item \begin{verbatim}Timer_Handler()：\end{verbatim}
+          定时功能处理
+          \begin{itemize}
+              \item 维护倒计时计数器
+              \item 时间到达时自动关闭风扇
+              \item 更新定时状态指示灯
+          \end{itemize}
+\end{itemize}
+
+\subsubsection{特定条件响应}
+\begin{itemize}
+    \item \begin{verbatim}HAL_TIM_IC_CaptureCallback()：\end{verbatim}红外信号捕获中断回调函数，实时处理遥控信号
+\end{itemize}
+
+\subsubsection{循环体结构}
+\begin{itemize}
+    \item \begin{verbatim}while (1) {
+  System_State_Update();
+  HAL_Delay(100);
+}\end{verbatim}主循环中每100ms更新系统状态
+\end{itemize}
+
+\subsection{技术实现细节}
+\subsubsection{PWM调速实现}
+使用TIM3产生频率为20kHz的PWM信号，通过改变CCR1寄存器的值调整占空比：
+\begin{align*}
+\text{占空比} = \frac{\text{CCR1}}{\text{ARR}} \times 100\%
+\end{align*}
+其中ARR=1000，对应档位：CCR1=300(低)/600(中)/900(高)
+
+\subsubsection{红外解码优化}
+采用定时器输入捕获+状态机实现：
+\begin{enumerate}
+    \item 检测下降沿触发
+    \item 测量脉冲宽度区分0/1
+    \item 校验地址码和命令码反码
+    \item 添加防抖处理（>100ms间隔）
+\end{enumerate}
+
+\subsubsection{低功耗设计}
+\begin{itemize}
+    \item 空闲时进入STOP模式，功耗<1mA
+    \item 红外中断唤醒系统
+    \item 关闭未使用的外设时钟
+    \item 电机停转时切断驱动电路电源
+\end{itemize}

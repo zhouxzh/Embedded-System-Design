@@ -1,0 +1,94 @@
+% !Mode:: "TeX:UTF-8"
+\section{物料与成本}
+
+\subsection{物料清单}
+\begin{table}[h]
+    \centering
+    \caption{系统物料清单}
+    \begin{tabular}{|l|c|c|c|}
+        \hline
+        \textbf{物料名称} & \textbf{数量} & \textbf{单价(元)} & \textbf{用途} \\ \hline
+        STM32F103C8T6核心板 & 1 & 12.50 & 主控制器 \\ \hline
+        L298N电机驱动模块 & 1 & 8.90 & 风扇电机驱动 \\ \hline
+        12V直流风扇 & 1 & 15.00 & 风力输出 \\ \hline
+        VS1838B红外接收头 & 1 & 1.20 & 遥控信号接收 \\ \hline
+        红外遥控器 & 1 & 5.80 & 用户控制输入 \\ \hline
+        12V/2A电源适配器 & 1 & 18.00 & 系统供电 \\ \hline
+        面包板 & 1 & 6.50 & 电路搭建 \\ \hline
+        杜邦线(20cm) & 20 & 0.15 & 电路连接 \\ \hline
+        蜂鸣器(5V有源) & 1 & 0.80 & 操作提示音 \\ \hline
+        LED指示灯(红绿黄) & 3 & 0.30 & 状态指示 \\ \hline
+        电阻(220Ω) & 5 & 0.05 & 限流保护 \\ \hline
+        电容(0.1μF) & 5 & 0.10 & 电源滤波 \\ \hline
+        \textbf{小计} & - & \textbf{70.70} & - \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{项目成本}
+\begin{table}[h]
+    \centering
+    \caption{项目成本分析}
+    \begin{tabular}{|l|r|l|}
+        \hline
+        \textbf{成本项目} & \textbf{金额(元)} & \textbf{备注} \\ \hline
+        材料成本 & 70.70 & 上表物料小计 \\ \hline
+        工具和设备折旧 & 15.00 & 示波器、万用表等工具使用费 \\ \hline
+        开发软件许可 & 0.00 & Keil MDK使用社区版 \\ \hline
+        3D打印外壳 & 25.00 & PLA材料打印费用 \\ \hline
+        其他费用 & 10.00 & PCB打样、运输等杂费 \\ \hline
+        \textbf{总成本} & \textbf{120.70} & - \\ \hline
+    \end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{总成本预计：} 120.70元（批量生产可降至80元以下）
+\end{itemize}
+
+\subsection{损耗与损坏}
+在项目实施过程中，由于操作失误和元件质量问题，产生以下损耗：
+\begin{itemize}
+    \item 烧毁L298N模块1个（错误接线导致短路） - 损失8.90元
+    \item 损坏STM32核心板1块（静电击穿） - 损失12.50元
+    \item 杜邦线损耗约10根 - 损失1.50元
+    \item \textbf{总损耗：} 22.90元（已计入总成本）
+\end{itemize}
+
+\subsection{主要物料图片展示}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{figures/logo.pdf}
+    \caption{STM32F103C8T6核心板}
+    \label{fig:stm32_board}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/logo.pdf}
+        \caption{L298N电机驱动模块}
+        \label{fig:l298n}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/logo.pdf}
+        \caption{VS1838B红外接收头}
+        \label{fig:ir_receiver}
+    \end{minipage}
+    
+    \vspace{1em}
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/logo.pdf}
+        \caption{12V直流风扇}
+        \label{fig:dc_fan}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/logo.pdf}
+        \caption{红外遥控器}
+        \label{fig:ir_remote}
+    \end{minipage}
+\end{figure}
