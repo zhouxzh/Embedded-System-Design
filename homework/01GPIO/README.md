@@ -27,7 +27,76 @@
 3. 切换到 **Clock Configuration** 标签页，确认 SYSCLK 来源为 HSI，频率为 8 MHz
 ![使用晶振](img/3.png)
 
-### 3. 配置 GPIO 引脚
+### 3. 配置调试接口（SYS）
+
+1. 左侧 **Pinout & Configuration → System Core → SYS**
+2. **Debug** 下拉菜单选择 `Serial Wire`
+![debug](img/7.png)
+
+**为什么必须选择 Serial Wire：**
+
+STM32F103C8T6 支持两种调试接口：
+
+| 选项 | 引脚占用 | 说明 |
+|------|----------|------|
+| `No Debug` | 无 | 禁用调试接口，PA13/PA14 作为普通 GPIO |
+| `Serial Wire` | PA13 (SWDIO)、PA14 (SWCLK) | SWD 调试接口，ST-Link 使用此协议 |
+| `JTAG (4 pins)` | PA13/PA14/PA15/PB3 | 完整 JTAG，占用引脚多 |
+| `JTAG (5 pins)` | 上述 + PB4 | 完整 JTAG + TRST |
+
+**选择 `No Debug` 后烧录程序会发生什么：**
+
+CubeMX 生成的初始化代码会将 PA13/PA14 重映射为普通 GPIO，**SWD 接口被禁用**。烧录该程序后：
+
+- ST-Link 无法再通过 SWD 连接芯片
+- 后续无法使用 ST-Link 烧录新程序或调试
+- 表现为 ST-Link 报错：`No target connected` 或 `Cannot connect to target`
+
+**这会让 STM32 变砖吗？**
+
+不会永久变砖，但需要通过**串口 ISP（UART 引导加载程序）**恢复：
+
+1. 将 BOOT0 引脚拉高（接 VCC），BOOT1 拉低（接 GND）
+2. 芯片上电后进入内置 Bootloader 模式
+3. 使用 **STM32CubeProgrammer** 通过 UART（PA9/PA10）连接芯片
+4. 烧录一个正确配置了 Serial Wire 的新程序
+5. 将 BOOT0 重新拉低，复位芯片，SWD 恢复正常
+
+**BOOT0 / BOOT1 引脚详解：**
+
+STM32F103 上电或复位时采样 BOOT0 和 BOOT1 电平，决定启动来源：
+
+| BOOT0 | BOOT1 | 启动模式 | 说明 |
+|-------|-------|----------|------|
+| 0（GND） | 任意 | 主闪存（Flash）启动 | 正常运行用户程序，**默认模式** |
+| 1（VCC） | 0（GND） | 系统存储器启动 | 运行出厂 Bootloader，支持串口 ISP 烧录 |
+| 1（VCC） | 1（VCC） | SRAM 启动 | 从 SRAM 运行代码，极少使用 |
+
+Blue Pill 板上有两个跳线帽，标注 `BOOT0` 和 `BOOT1`，拨到 `0` 侧接 GND，拨到 `1` 侧接 VCC。
+
+进入串口 ISP 模式步骤：
+1. **BOOT0 跳线拨到 `1`**，BOOT1 保持 `0`
+2. 按 RESET 或重新上电，芯片进入系统 Bootloader
+3. USB-TTL 模块连接：PA9 → RX，PA10 → TX，GND → GND
+4. STM32CubeProgrammer 选接口 `UART`，选对应串口，点击 Connect
+5. 烧录完成后 **BOOT0 拨回 `0`**，按 RESET 正常启动
+
+> 结论：选择 `No Debug` 不会物理损坏芯片，但会导致 SWD 调试接口失效，必须通过串口 Bootloader 才能恢复，操作繁琐。**务必选择 `Serial Wire`。**
+
+**利用 Reset 按键配合 ST-Link 恢复 SWD 的方法：**
+
+如果 SWD 已被禁用，ST-Link 无法正常连接，可以尝试以下方法，利用芯片复位瞬间 SWD 尚未被用户代码覆盖的时间窗口强行连接：
+
+1. 打开 **STM32CubeProgrammer**，连接方式选择 `ST-LINK`，Mode 选择 `Under Reset`
+2. 用手按住开发板上的 **RESET 按键不松开**（保持芯片处于复位状态）
+3. 点击 STM32CubeProgrammer 的 **Connect** 按钮
+4. 在 Connect 的同时**松开 RESET 按键**，让芯片开始运行
+5. 芯片刚上电的极短时间内，SWD 引脚尚处于默认复用状态，STM32CubeProgrammer 可以在用户代码将其重映射为 GPIO 之前抢先建立连接
+6. 连接成功后，立即烧录一个正确配置了 `Serial Wire` 的新程序
+
+> 此方法成功率取决于时序配合，需要多试几次。若多次失败，则改用串口 ISP（BOOT0 拉高）方式恢复。
+
+### 4. 配置 GPIO 引脚
 
 #### **PC13（LED 输出）：**
 1. 在芯片引脚图上点击 **PC13**，选择 `GPIO_Output`
