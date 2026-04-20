@@ -1,0 +1,87 @@
+digraph CallbackMainFlow {
+  graph [
+    rankdir=TB,
+    compound=true,
+    splines=ortho,
+    nodesep=0.28,
+    ranksep=0.45,
+    pad=0.18,
+    bgcolor="white"
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="Microsoft YaHei",
+    fontsize=12,
+    color="#0E4C92",
+    fillcolor="#F4F6F8",
+    fontcolor="#0E4C92",
+    margin="0.10,0.07"
+  ];
+
+  edge [
+    color="#0E4C92",
+    penwidth=1.5,
+    arrowsize=0.72
+  ];
+
+  subgraph cluster_cb {
+    label="CDC_Receive_FS 回调";
+    fontname="Microsoft YaHei";
+    fontsize=14;
+    fontcolor="#0E4C92";
+    color="#0E4C92";
+    style="rounded";
+
+    r1 [label="收到 Buf 和 Len"];
+    r2 [label="复制到应用层缓冲区"];
+    r3 [label="保存接收长度并置标志位"];
+    r4 [label="重新开启下一次 USB 接收"];
+
+    {
+      rank=same;
+      r1 -> r2;
+    }
+    {
+      rank=same;
+      r3 -> r4;
+    }
+
+    r1 -> r2;
+    r2 -> r3;
+    r3 -> r4;
+  }
+
+  subgraph cluster_main {
+    label="主循环";
+    fontname="Microsoft YaHei";
+    fontsize=14;
+    fontcolor="#0E4C92";
+    color="#0E4C92";
+    style="rounded";
+
+    m1 [label="检查接收标志位"];
+    m2 [shape=diamond, style="filled", fillcolor="#F7E7B4", label="有新数据？"];
+    m3 [label="进入临界区，复制共享数据并清标志"];
+    m4 [label="补 \\0，清理回车换行"];
+    m5 [label="命令解析并调用发送函数"];
+
+    {
+      rank=same;
+      m1 -> m2;
+    }
+    {
+      rank=same;
+      m3 -> m4;
+    }
+
+    m1 -> m2;
+    m2 -> m3 [xlabel="是", fontname="Microsoft YaHei", fontsize=11];
+    m3 -> m4;
+    m4 -> m5;
+    m2 -> m1 [xlabel="否", fontname="Microsoft YaHei", fontsize=11];
+  }
+
+  r3 -> m1 [style=dashed, ltail=cluster_cb, lhead=cluster_main];
+}

@@ -1,0 +1,38 @@
+digraph HostDevice {
+  graph [
+    rankdir=TB,
+    splines=ortho,
+    nodesep=0.35,
+    ranksep=0.55,
+    pad=0.15,
+    bgcolor="white"
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="Microsoft YaHei",
+    fontsize=14,
+    color="#0E4C92",
+    fillcolor="#F4F6F8",
+    fontcolor="#0E4C92",
+    margin="0.12,0.08"
+  ];
+
+  edge [
+    color="#0E4C92",
+    penwidth=1.7,
+    arrowsize=0.8
+  ];
+
+  host [label="主机\nPC / Laptop"];
+  hub  [label="USB 集线器\nHub"];
+  dev1 [label="STM32 开发板\nDevice"];
+  dev2 [label="键盘\nDevice"];
+  dev3 [label="U 盘\nDevice"];
+
+  host -> hub;
+  hub -> dev1;
+  hub -> dev2;
+  hub -> dev3;
+}

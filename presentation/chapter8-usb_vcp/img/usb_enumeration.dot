@@ -1,0 +1,54 @@
+digraph USBEnumeration {
+  graph [
+    rankdir=TB,
+    splines=ortho,
+    nodesep=0.32,
+    ranksep=0.55,
+    pad=0.15,
+    bgcolor="white"
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="Microsoft YaHei",
+    fontsize=13,
+    color="#0E4C92",
+    fillcolor="#F4F6F8",
+    fontcolor="#0E4C92",
+    margin="0.12,0.08"
+  ];
+
+  edge [
+    color="#0E4C92",
+    penwidth=1.6,
+    arrowsize=0.75
+  ];
+
+  n1 [label="1. 设备插入\nUSB 端口"];
+  n2 [label="2. 主机检测到\n新设备连接"];
+  n3 [label="3. 主机复位设备并\n读取设备描述符"];
+  n4 [label="4. 为设备分配\n唯一地址"];
+  n5 [label="5. 继续读取配置 /\n接口 / 端点描述符"];
+  n6 [label="6. 根据类信息匹配\n并加载驱动"];
+  n7 [label="7. 操作系统创建\n设备节点，如 COMx"];
+
+  {
+    rank=same;
+    n1 -> n2;
+  }
+
+  {
+    rank=same;
+    n3 -> n4;
+  }
+
+  {
+    rank=same;
+    n5 -> n6;
+  }
+
+  n2 -> n3;
+  n4 -> n5;
+  n6 -> n7;
+}

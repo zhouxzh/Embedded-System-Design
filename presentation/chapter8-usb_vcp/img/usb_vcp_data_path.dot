@@ -1,0 +1,53 @@
+digraph USBVCPDataPath {
+  graph [
+    rankdir=TB,
+    splines=ortho,
+    nodesep=0.32,
+    ranksep=0.6,
+    pad=0.15,
+    bgcolor="white"
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="Microsoft YaHei",
+    fontsize=12,
+    color="#0E4C92",
+    fillcolor="#F4F6F8",
+    fontcolor="#0E4C92",
+    margin="0.10,0.07"
+  ];
+
+  edge [
+    color="#0E4C92",
+    penwidth=1.5,
+    arrowsize=0.72
+  ];
+
+  a1 [label="串口调试助手"];
+  a2 [label="串口 API"];
+  a3 [label="CDC 驱动"];
+  a4 [label="USB 主机控制器"];
+  a5 [label="USB 总线"];
+  b1 [label="STM32\nUSB 外设"];
+  b2 [label="USB Device\n协议栈"];
+  b3 [label="usbd_cdc_if"];
+  b4 [label="用户应用层"];
+
+  {
+    rank=same;
+    a1 -> a2 -> a3 -> a4 -> a5;
+  }
+
+  {
+    rank=same;
+    b4 -> b3 -> b2 -> b1 [style=invis, weight=20];
+  }
+
+  a1 -> a2 -> a3 -> a4 -> a5;
+  a5 -> b1;
+  b1 -> b2 [constraint=false];
+  b2 -> b3 [constraint=false];
+  b3 -> b4 [constraint=false];
+}

@@ -1,0 +1,42 @@
+digraph USBDeviceStructure {
+  graph [
+    rankdir=TB,
+    splines=ortho,
+    nodesep=0.3,
+    ranksep=0.45,
+    pad=0.15,
+    bgcolor="white"
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="Microsoft YaHei",
+    fontsize=14,
+    color="#0E4C92",
+    fillcolor="#F4F6F8",
+    fontcolor="#0E4C92",
+    margin="0.12,0.08"
+  ];
+
+  edge [
+    color="#0E4C92",
+    penwidth=1.6,
+    arrowsize=0.8
+  ];
+
+  dev   [label="USB Device"];
+  cfg   [label="Configuration 1"];
+  if0   [label="Interface 0\nControl"];
+  if1   [label="Interface 1\nData"];
+  ep0   [label="Endpoint 0"];
+  epin  [label="Bulk IN"];
+  epout [label="Bulk OUT"];
+
+  dev -> cfg;
+  cfg -> if0;
+  cfg -> if1;
+  if0 -> ep0;
+  if1 -> epin;
+  if1 -> epout;
+}

@@ -1,0 +1,49 @@
+digraph STM32USBStack {
+  graph [
+    rankdir=TB,
+    splines=ortho,
+    nodesep=0.35,
+    ranksep=0.6,
+    pad=0.15,
+    bgcolor="white"
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="Microsoft YaHei",
+    fontsize=13,
+    color="#0E4C92",
+    fillcolor="#F4F6F8",
+    fontcolor="#0E4C92",
+    margin="0.12,0.08"
+  ];
+
+  edge [
+    color="#0E4C92",
+    penwidth=1.6,
+    arrowsize=0.8
+  ];
+
+  u1 [label="用户应用层\n命令解析、状态输出、业务逻辑", fillcolor="#DCEFE2"];
+  u2 [label="usbd_cdc_if.c\n发送接口、接收回调、应用缓冲区"];
+  u3 [label="CDC Class Middleware\nCDC 类处理与接口适配"];
+  u4 [label="USB Device Core\n枚举、请求处理、端点管理"];
+  u5 [label="HAL / PCD 驱动\nUSB 外设底层驱动"];
+  u6 [label="STM32 USB 硬件外设"];
+
+  {
+    rank=same;
+    u1 -> u2 -> u3;
+  }
+
+  {
+    rank=same;
+    u6 -> u5 -> u4 [style=invis, weight=20];
+  }
+
+  u1 -> u2 -> u3;
+  u3 -> u4;
+  u4 -> u5 [constraint=false];
+  u5 -> u6 [constraint=false];
+}

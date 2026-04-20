@@ -1,0 +1,78 @@
+digraph ProgramFlow {
+  graph [
+    rankdir=TB,
+    splines=ortho,
+    nodesep=0.28,
+    ranksep=0.45,
+    pad=0.18,
+    bgcolor="white"
+  ];
+
+  node [
+    shape=box,
+    style="rounded,filled",
+    fontname="Microsoft YaHei",
+    fontsize=12,
+    color="#0E4C92",
+    fillcolor="#F4F6F8",
+    fontcolor="#0E4C92",
+    margin="0.11,0.08"
+  ];
+
+  edge [
+    color="#0E4C92",
+    penwidth=1.5,
+    arrowsize=0.72
+  ];
+
+  start [label="系统上电 /\n复位"];
+  init1 [label="HAL 与系统\n时钟初始化"];
+  init2 [label="GPIO 与\nUSB Device CDC 初始化"];
+  init3 [label="等待枚举稳定\n并准备欢迎信息"];
+  loop0 [label="进入主循环"];
+
+  task1 [label="执行周期任务\n如心跳、状态刷新"];
+  task2 [label="检查接收标志\n是否有新数据"];
+  task3 [label="复制共享缓冲区\n到本地变量"];
+  task4 [label="解析命令并\n生成响应"];
+  task5 [label="调用 USB 发送\n接口返回结果"];
+
+  looplbl [shape=plaintext, label="主循环反复执行", fontcolor="#0E4C92", fontsize=13];
+
+  {
+    rank=same;
+    start -> init1;
+  }
+
+  {
+    rank=same;
+    init2 -> init3;
+  }
+
+  {
+    rank=same;
+    loop0 -> task1;
+  }
+
+  {
+    rank=same;
+    task2 -> task3;
+  }
+
+  {
+    rank=same;
+    task4 -> task5;
+  }
+
+  start -> init1;
+  init1 -> init2;
+  init2 -> init3;
+  init3 -> loop0;
+  loop0 -> task1;
+  task1 -> task2;
+  task2 -> task3;
+  task3 -> task4;
+  task4 -> task5;
+  task5 -> task1;
+  looplbl -> task1 [style=invis];
+}
