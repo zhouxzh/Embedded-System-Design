@@ -44,12 +44,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-#define PWM_PERIOD  100U
-
-static volatile uint32_t s_pwmCounter = 0;
-static volatile uint32_t s_pwmDuty    = 0;
-static          uint32_t s_breathStep = 0;
-static          int8_t   s_breathDir  = 1;
+uint32_t Led = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -60,26 +55,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-    if (htim->Instance == TIM3)
-    {
-        s_pwmCounter++;
-        if (s_pwmCounter >= PWM_PERIOD)
-        {
-            s_pwmCounter = 0;
-        }
 
-        if (s_pwmCounter < s_pwmDuty)
-        {
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-        }
-        else
-        {
-            HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-        }
-    }
-}
 /* USER CODE END 0 */
 
 /**
@@ -96,7 +72,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-   HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -113,7 +89,9 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -121,27 +99,24 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-    s_breathStep++;
-    if (s_breathStep >= 10)
+    for (int i = 0; i < 100; i++)
     {
-        s_breathStep = 0;
-        s_pwmDuty += s_breathDir;
-
-        if (s_pwmDuty >= PWM_PERIOD)
-        {
-            s_pwmDuty = PWM_PERIOD;
-            s_breathDir = -1;
-        }
-        else if (s_pwmDuty == 0)
-        {
-            s_breathDir = 1;
-        }
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (Led % 3 == 2) ? i : 0);
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (Led % 3 == 0) ? i : 0);
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, (Led % 3 == 1) ? i : 0);
+      HAL_Delay(10);
     }
-    HAL_Delay(1);
-    /* USER CODE END 3 */
+    for (int i = 99; i >= 0; i--)
+    {
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (Led % 3 == 2) ? i : 0);
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, (Led % 3 == 0) ? i : 0);
+      __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_4, (Led % 3 == 1) ? i : 0);
+      HAL_Delay(10);
+    }
+    Led++;
+    /* USER CODE BEGIN 3 */
   }
+  /* USER CODE END 3 */
 }
 
 /**
