@@ -1,4 +1,4 @@
-# 作业2：LED闪烁实验
+# LED闪烁实验
 
 ## 统一作业说明
 
@@ -418,7 +418,7 @@ HAL_Delay(500)实际延时 = 500 × (8/72) = 55.5ms
    - 设置Toolchain/IDE：CMake
    - 点击"GENERATE CODE"
 
-![生成代码](img/6.png)
+![生成代码](img/6.png){ width=72% }
 
 ### 步骤2：编写LED闪烁代码
 

@@ -1,0 +1,100 @@
+\usepackage{graphicx}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\usepackage{fvextra}
+\usepackage{setspace}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+\usepackage[automark,headsepline=false,footsepline=false]{scrlayer-scrpage}
+
+% Ensure every image stays inside the text block, with a slightly smaller default size.
+\setkeys{Gin}{width=0.72\linewidth,keepaspectratio}
+
+% Latin fonts
+\setmainfont{Latin Modern Roman}
+\setsansfont{Latin Modern Sans}
+\setmonofont[
+  BoldFont=Noto Sans Mono CJK SC,
+  ItalicFont=Noto Sans Mono CJK SC,
+  SlantedFont=Noto Sans Mono CJK SC,
+  BoldItalicFont=Noto Sans Mono CJK SC,
+  ItalicFeatures={FakeSlant=0.2},
+  SlantedFeatures={FakeSlant=0.2},
+  BoldItalicFeatures={FakeSlant=0.2}
+]{Noto Sans Mono CJK SC}
+
+% CJK fonts
+\setCJKmainfont[
+  BoldFont=Noto Serif CJK SC,
+  ItalicFont=KaiTi,
+  SlantedFont=KaiTi,
+  BoldItalicFont=KaiTi
+]{Noto Serif CJK SC}
+\setCJKsansfont[
+  BoldFont=Noto Sans CJK SC,
+  ItalicFont=KaiTi,
+  SlantedFont=KaiTi,
+  BoldItalicFont=KaiTi
+]{Noto Sans CJK SC}
+\setCJKmonofont[
+  ItalicFont=KaiTi,
+  SlantedFont=KaiTi,
+  BoldItalicFont=KaiTi
+]{Noto Sans Mono CJK SC}
+
+\setstretch{1.12}
+\setlength{\headheight}{18pt}
+
+% KOMA page style
+\clearpairofpagestyles
+\ihead{\headmark}
+\ohead{\pagemark}
+\renewcommand*{\chaptermarkformat}{第\thechapter 章\enskip}
+\renewcommand*{\sectionmarkformat}{\thesection\enskip}
+\automark[section]{chapter}
+\pagestyle{scrheadings}
+
+% Chapter and section typography
+\setkomafont{chapter}{\Huge\bfseries}
+\setkomafont{section}{\Large\bfseries}
+\setkomafont{subsection}{\large\bfseries}
+\RedeclareSectionCommand[beforeskip=-0.5\baselineskip,afterskip=1.2\baselineskip]{chapter}
+
+% Avoid requesting italic shapes from the CJK monospaced font in code highlighting.
+\renewcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{#1}}}
+\renewcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{#1}}
+\renewcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{#1}}}
+\renewcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{#1}}}
+\renewcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{#1}}}
+
+% Render fenced Markdown code blocks as compact, styled code panels.
+\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{
+  commandchars=\\\{\},
+  fontsize=\small,
+  baselinestretch=0.95,
+  breaklines,
+  breakanywhere,
+  breaksymbolleft={},
+  xleftmargin=0.5em,
+  xrightmargin=0.5em
+}
+
+\renewenvironment{Shaded}{
+  \begin{tcolorbox}[
+    enhanced,
+    breakable,
+    sharp corners,
+    boxrule=0.4pt,
+    colback=black!2,
+    colframe=black!15,
+    left=4pt,
+    right=4pt,
+    top=4pt,
+    bottom=4pt,
+    boxsep=1pt,
+    before skip=6pt,
+    after skip=6pt
+  ]
+}{
+  \end{tcolorbox}
+}

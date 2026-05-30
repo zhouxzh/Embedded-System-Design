@@ -1,4 +1,4 @@
-# 07I2C — STM32 I2C OLED 显示实验
+# STM32 I2C OLED 显示实验
 
 ## 1. 实验概述
 
@@ -38,6 +38,8 @@
 
 ![OLED 模块实物连接](img/6OLED.jpg)
 
+图示为 OLED 模块与开发板的实物连接参考。
+
 ---
 
 ## 3. STM32CubeMX 配置步骤
@@ -58,7 +60,7 @@
 
 > **说明：** STM32F103C8T6 核心板通常板载 8MHz 晶振，通过 HSE + PLL 倍频到 72MHz。
 
-![RCC 配置](img/2RCC.png)
+![RCC 配置](img/2RCC.png){ width=72% }
 
 ### 3.3 配置调试接口（SYS）
 
@@ -88,7 +90,7 @@
 
 > **为什么 OwnAddress1 设为 0？** STM32 在本次实验中只作为 I2C 主机主动发送数据，不接收来自其他设备的 I2C 请求，因此不需要分配从机地址。
 
-![I2C 配置](img/3I2C.png)
+![I2C 配置](img/3I2C.png){ width=72% }
 
 ### 3.5 配置时钟树（Clock Configuration）
 
@@ -104,7 +106,7 @@
 
 > **为什么 APB1 要二分频？** STM32F103 的 APB1 总线最高频率为 36MHz，必须对 72MHz 的 AHB 进行二分频。I2C1 挂在 APB1 上，其输入时钟为 36MHz，HAL 库会自动计算分频系数使 SCL 达到设定的 100kHz。
 
-![时钟树配置](img/4Clock.png)
+![时钟树配置](img/4Clock.png){ width=72% }
 
 ### 3.6 配置工程输出
 
@@ -114,7 +116,7 @@
 4. **Application Structure:** Basic
 5. **Toolchain / IDE:** 选择 **CMake**（配合 VS Code + ARM GCC 使用）
 
-![工程配置](img/5Project.png)
+![工程配置](img/5Project.png){ width=72% }
 
 ### 3.7 生成代码
 

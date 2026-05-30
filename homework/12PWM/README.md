@@ -1,4 +1,4 @@
-# 作业：STM32 通用定时器 — 三通道硬件 PWM 交替呼吸灯实验
+# STM32 通用定时器 — 三通道硬件 PWM 交替呼吸灯实验
 
 ## 统一作业说明
 
@@ -86,7 +86,7 @@
 
 这样便于后续通过 ST-Link 下载和调试程序。如果未正确配置调试接口，可能出现芯片无法正常调试或下载的问题。
 
-![SYS 调试接口配置](img/1SYS.png)
+![SYS 调试接口配置](img/1SYS.png){ width=72% }
 
 ### 3.3 配置高速外部时钟（RCC）
 
@@ -94,7 +94,7 @@
 
 这样做的目的是为 PLL 和系统时钟提供稳定的外部时钟来源（8 MHz 晶振）。
 
-![RCC 外部时钟配置](img/2RCC.png)
+![RCC 外部时钟配置](img/2RCC.png){ width=72% }
 
 ### 3.4 配置时钟树（Clock Configuration）
 
@@ -106,7 +106,7 @@
 4. 确保 **HCLK** = 72 MHz，**APB1 Timer Clocks** = 72 MHz，**APB2 Timer Clocks** = 72 MHz。
 5. 确认 **APB1 Prescaler** = /2，这样 APB1 外设时钟为 36 MHz，而 APB1 定时器时钟为 72 MHz（自动 ×2）。
 
-![时钟树配置](img/3ClockConfiguration.png)
+![时钟树配置](img/3ClockConfiguration.png){ width=72% }
 
 ### 3.5 配置 TIM3 PWM 输出通道
 

@@ -1,4 +1,4 @@
-# 作业10：STM32 ADC 温度传感器 DMA 采集与虚拟串口高速传输实验
+﻿# STM32 ADC 温度传感器 DMA 采集与虚拟串口高速传输实验
 
 ## 统一作业说明
 
@@ -39,7 +39,7 @@
 
 ---
 
-## 1. 实验目的
+## 实验目的
 
 本实验基于 STM32 的 ADC1 配合 DMA 循环模式连续采集芯片内置温度传感器数据，并通过 USB CDC 虚拟串口高速发送到电脑端，使用 Python 客户端实时解析并绘制温度曲线。通过本实验，你应掌握以下内容：
 
@@ -51,9 +51,9 @@
 6. 学会编写 Python 上位机程序，通过 pyserial + matplotlib 实现实时数据采集与可视化。
 7. 能够评估 ADC + DMA + USB CDC 系统的数据吞吐能力。
 
-## 2. 实验原理
+## 实验原理
 
-### 2.1 STM32F103 内置温度传感器
+### STM32F103 内置温度传感器
 
 STM32F103C8T6 芯片内部集成了一个温度传感器，连接到 **ADC1 的通道 16**。该温度传感器的电气特性如下（来自数据手册）：
 
@@ -74,7 +74,7 @@ $$\text{Temp}(°C) = \frac{V_{25} - V_{sense}}{Avg\_Slope} + 25$$
 
 **注意：** 内部温度传感器测量的是芯片的**结温（Junction Temperature）**。芯片运行时自身会发热（约 10~20°C 的温升），而且 V25 和 Avg_Slope 存在制造偏差，因此测量值可能与室温有显著差异。
 
-### 2.2 ADC 连续转换模式
+### ADC 连续转换模式
 
 STM32F103 的 ADC1 支持两种工作模式：
 
@@ -85,7 +85,7 @@ STM32F103 的 ADC1 支持两种工作模式：
 
 本实验选择**连续转换模式**，原因是：DMA 配置为循环模式后会持续等待 ADC 数据，但 ADC 本身如果是单次转换模式，每次软件触发只产生一个数据后就停止，DMA 之后拿不到新数据。只有 ADC 连续转换模式才能不断产生数据流，使 DMA 循环传输形成闭环。
 
-### 2.3 DMA 循环模式原理
+### DMA 循环模式原理
 
 DMA（Direct Memory Access）可以在不占用 CPU 的情况下，将数据从外设（如 ADC 数据寄存器）搬运到内存。STM32F103 的 DMA1 通道 1 专用于 ADC1。
 
@@ -110,7 +110,7 @@ DMA 有两种主要工作模式：
 | USART1_TX | DMA1 Channel 4 |
 | ... | ... |
 
-### 2.4 HAL ADC DMA 回调机制
+### HAL ADC DMA 回调机制
 
 当使用 `HAL_ADC_Start_DMA()` 启动 ADC 后，HAL 库会自动注册 DMA 传输完成回调。DMA 每搬运完成一次 ADC 数据，中断处理流程如下：
 
@@ -123,13 +123,13 @@ DMA1_Channel1_IRQHandler()
 
 用户只需在 `main.c` 中实现 `void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)`，每次 ADC 转换完成时该函数会自动被调用，且**在中断上下文中执行**。
 
-### 2.5 USB CDC 虚拟串口原理
+### USB CDC 虚拟串口原理
 
 USB CDC（Communication Device Class）是 USB 协议中定义的一种设备类，它可以在 USB 总线上模拟传统的串行通信接口。当 STM32 通过 USB 连接电脑后，操作系统会将其识别为一个标准 COM 端口。
 
 与物理 UART 串口不同，USB CDC 的波特率、数据位、停止位等参数不影响实际传输速率——数据始终以 USB 全速（12 Mbps）在底层传输。但对于 pyserial 等库，仍需要指定一个波特率值来打开端口（该值会被忽略）。
 
-### 2.6 newlib-nano 与浮点格式化限制
+### newlib-nano 与浮点格式化限制
 
 嵌入式 GCC 工具链默认使用 `--specs=nano.specs`，即 newlib-nano 标准库。newlib-nano 为了减小代码体积，**默认不支持 `printf`/`sprintf` 系列函数的浮点格式化**（`%f`、`%e`、`%g` 等）。
 
@@ -144,7 +144,7 @@ USB CDC（Communication Device Class）是 USB 协议中定义的一种设备类
 
 本实验采用**整型运算 + 发送原始 ADC 值**的方案——STM32 端只发送整型原始 ADC 值，温度换算与浮点显示完全放到 Python 客户端进行。这样同时避免了代码体积膨胀和格式化问题。
 
-### 2.7 数据吞吐能力估算
+### 数据吞吐能力估算
 
 ADC 转换一次的时间：
 
@@ -161,15 +161,15 @@ ADC 理论最大采样率约 **47,000 sps**。
 
 ---
 
-## 3. 实验环境
+## 实验环境
 
-### 3.1 硬件环境
+### 硬件环境
 
 1. 一块带 USB 接口的 STM32F103C8T6 开发板。
 2. 一根可正常传输数据的 USB 数据线。
 3. ST-Link 下载器或板载调试器。
 
-### 3.2 软件环境
+### 软件环境
 
 1. STM32CubeMX（v6.17.0 或更高版本）。
 2. VS Code / STM32CubeIDE 或其他支持 CMake 的 STM32 开发环境。
@@ -177,7 +177,7 @@ ADC 理论最大采样率约 **47,000 sps**。
 4. Python 3.x + pyserial + matplotlib（用于客户端可视化）。
 5. ST-Link 驱动。
 
-### 3.3 Python 环境配置
+### Python 环境配置
 
 ```bash
 pip install pyserial matplotlib
@@ -185,9 +185,9 @@ pip install pyserial matplotlib
 
 ---
 
-## 4. STM32CubeMX 配置步骤
+## STM32CubeMX 配置步骤
 
-### 4.1 从作业 9 工程另存为新工程
+### 从作业 9 工程另存为新工程
 
 本实验在作业 9 的基础上修改，无需从头新建。
 
@@ -195,17 +195,17 @@ pip install pyserial matplotlib
 2. 点击 **File → Save As**，将工程另存为 `10DMA.ioc`（存放在 `10DMA` 文件夹中）。
 3. 后续配置步骤在此基础上进行修改。
 
-![另存为 10DMA](img/1另存为10DMA.png)
+![另存为 10DMA](img/1另存为10DMA.png){ width=72% }
 
-### 4.2 检查调试接口（SYS）
+### 检查调试接口（SYS）
 
 在 Pinout & Configuration 页面中，打开 **SYS**，确认 **Debug** 已设置为 **Serial Wire**（从 09ADC 继承，无需重新配置）。
 
-### 4.3 检查高速外部时钟（RCC）
+### 检查高速外部时钟（RCC）
 
 打开 **RCC** 配置项，确认 **High Speed Clock (HSE)** 已设置为 **Crystal/Ceramic Resonator**（外部 8 MHz 晶振），从 09ADC 继承。
 
-### 4.4 配置 ADC1（温度传感器通道）
+### 配置 ADC1（温度传感器通道）
 
 在 **Analog** → **ADC1** 中：
 
@@ -225,9 +225,9 @@ ADC 参数配置说明：
 | DataAlign | ADC_DATAALIGN_RIGHT | 数据右对齐，12 位结果在低 12 位 |
 | NbrOfConversion | 1 | 每次转换 1 个通道 |
 
-![连续转换模式](img/3Continuous%20Conversion%20Mode.png)
+![(1)(1)(1)(1)(1)(1)](img/3Continuous Conversion Mode.png){ width=72% }
 
-#### 4.4.1 配置 ADC 采样时间
+#### 配置 ADC 采样时间
 
 采样时间选择 **239.5 Cycles**（`ADC_SAMPLETIME_239CYCLES_5`）。
 
@@ -239,7 +239,7 @@ ADC 内部有一个采样保持电容，在采样阶段需要对该电容充电�
 - 总转换时间 = (239.5 + 12.5) / 12 MHz ≈ 21 μs
 - 21 μs > 17.1 μs，满足数据手册要求
 
-### 4.5 配置 DMA（ADC1 数据传输）
+### 配置 DMA（ADC1 数据传输）
 
 这是本实验区别于作业 9 的核心配置。在 **System Core** → **DMA** 中：
 
@@ -269,7 +269,7 @@ ADC 内部有一个采样保持电容，在采样阶段需要对该电容充电�
 - **Memory Increment = Enable**：当缓冲区大小 > 1 时，DMA 会依次填充数组元素。
 - **Data Width = Half Word**：ADC 转换结果为 12 位，用 16 位存储刚好。
 
-### 4.6 启用 USB 外设并配置 CDC 中间件
+### 启用 USB 外设并配置 CDC 中间件
 
 在左侧 **Connectivity** 菜单下找到 **USB**，将其配置为 **Device (FS)**。
 
@@ -280,7 +280,7 @@ ADC 内部有一个采样保持电容，在采样阶段需要对该电容充电�
 2. 自动生成 USB 虚拟串口所需的设备描述符、接口文件和 CDC 中间件代码。
 3. 电脑端将识别此设备为标准 COM 端口。
 
-### 4.7 配置时钟树
+### 配置时钟树
 
 进入 **Clock Configuration** 页面：
 
@@ -301,7 +301,7 @@ ADC 内部有一个采样保持电容，在采样阶段需要对该电容充电�
 - APB2 为 48 MHz，保证了 GPIO 和 ADC 外设的运行效率。
 - DMA 属于 AHB 总线设备，HCLK = 48 MHz，确保 DMA 传输不成为瓶颈。
 
-### 4.8 配置工程并生成代码
+### 配置工程并生成代码
 
 在 **Project Manager** 页面中：
 
@@ -313,7 +313,7 @@ ADC 内部有一个采样保持电容，在采样阶段需要对该电容充电�
 
 ---
 
-## 5. 硬件连接要点
+## 硬件连接要点
 
 1. USB_DP（PA12）与 USB_DM（PA11）分别连接 USB 连接器的 D+ 与 D-。
 2. 确保开发板的 USB D+ 线路上有 1.5kΩ 上拉电阻到 3.3V（USB 全速设备枚举的硬件要求）。
@@ -323,9 +323,9 @@ ADC 内部有一个采样保持电容，在采样阶段需要对该电容充电�
 
 ---
 
-## 6. 核心代码说明
+## 核心代码说明
 
-### 6.1 代码整体结构
+### 代码整体结构
 
 ```c
 // Private variables
@@ -355,7 +355,7 @@ ADC 连续转换 → DMA 搬运到 adc_value → DMA TC 中断
     → HAL_ADC_ConvCpltCallback → sprintf → CDC_Transmit_FS
 ```
 
-### 6.2 main.c 中新增的头文件和变量声明
+### main.c 中新增的头文件和变量声明
 
 ```c
 /* Private includes ----------------------------------------------------------*/
@@ -379,7 +379,7 @@ void CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 2. `uint16_t adc_value`：DMA 的目标缓冲区。由于 BufferSize = 1 且 DMA 为循环模式，每次 ADC 转换完成后 DMA 都会将新值写入此变量。
 3. `CDC_Transmit_FS` 的前向声明：该函数定义在 `usbd_cdc_if.c` 中，需要在 main.c 中引用。
 
-### 6.3 DMA 传输完成回调函数
+### DMA 传输完成回调函数
 
 ```c
 /* Private user code ---------------------------------------------------------*/
@@ -409,7 +409,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 - 温度换算放在 Python 客户端完成，更灵活（可更换校正算法、做数据平滑等）。
 - 原始值只有 0~4095，占用串口带宽更小。
 
-### 6.4 main() 中的初始化与启动代码
+### main() 中的初始化与启动代码
 
 ```c
 int main(void)
@@ -447,7 +447,7 @@ int main(void)
 
 STM32F103 参考手册规定，使用内部温度传感器或 VREFINT 前必须置位 ADC_CR2 寄存器的 TSVREFE 位。CubeMX 在代码生成过程中并不会自动添加此位操作——这是 STM32F1 系列 HAL 库的历史遗留设计，ST 没有在 `HAL_ADC_Init()` 中集成此功能。因此必须在代码中手动 `SET_BIT(ADC1->CR2, ADC_CR2_TSVREFE)`，且在 `MX_ADC1_Init()` 之前执行以确保 ADC 校准时传感器已上电稳定。
 
-### 6.5 ADC1 初始化代码（由 STM32CubeMX 生成）
+### ADC1 初始化代码（由 STM32CubeMX 生成）
 
 ```c
 static void MX_ADC1_Init(void)
@@ -475,7 +475,7 @@ static void MX_ADC1_Init(void)
 - `ADC_SOFTWARE_START`：由 `HAL_ADC_Start_DMA()` 中的软件触发启动首次转换。
 - `ADC_SAMPLETIME_239CYCLES_5`：采样周期 239.5 个 ADC 时钟周期（约 20 μs），满足温度传感器 ≥ 17.1 μs 的建立时间要求。
 
-### 6.6 DMA 初始化代码（由 STM32CubeMX 生成）
+### DMA 初始化代码（由 STM32CubeMX 生成）
 
 ```c
 static void MX_DMA_Init(void)
@@ -511,7 +511,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 }
 ```
 
-### 6.7 DMA 中断处理函数
+### DMA 中断处理函数
 
 ```c
 void DMA1_Channel1_IRQHandler(void)
@@ -522,7 +522,7 @@ void DMA1_Channel1_IRQHandler(void)
 
 该函数在 `stm32f1xx_it.c` 中，由 CubeMX 自动生成。DMA 的传输完成（TC）、半传输（HT）、传输错误（TE）等中断事件均由 `HAL_DMA_IRQHandler` 统一处理。TC 事件最终触发 `HAL_ADC_ConvCpltCallback`。
 
-### 6.8 Python 客户端代码
+### Python 客户端代码
 
 客户端使用 tkinter + matplotlib 构建实时温度曲线界面。
 
@@ -562,7 +562,7 @@ temp = (1430 - mv) / 4.3 + 25    # 电压 → 温度 (°C)
 | `canvas.draw_idle()` 而非 `draw()` | 降低 GUI 刷新对 CPU 的占用 |
 | 读线程失败时自动关闭串口 | 避免 `Stop` 按钮与 `readline()` 之间的竞态条件 |
 
-### 6.9 代码结构的整体工作流程
+### 代码结构的整体工作流程
 
 本实验代码可以概括为以下步骤：
 
@@ -575,7 +575,7 @@ temp = (1430 - mv) / 4.3 + 25    # 电压 → 温度 (°C)
 
 ---
 
-## 7. 编程技巧总结
+## 编程技巧总结
 
 1. **ADC 连续转换 + DMA 循环模式是黄金搭档**：单次转换 + 循环 DMA 无法形成连续数据流，两者必须同时使能。
 2. **TSVREFE 必须手动使能**：`SET_BIT(ADC1->CR2, ADC_CR2_TSVREFE)` 需要在 `MX_ADC1_Init()` 之前执行，确保 ADC 校准时传感器已稳定。
@@ -587,25 +587,25 @@ temp = (1430 - mv) / 4.3 + 25    # 电压 → 温度 (°C)
 
 ---
 
-## 8. 实验操作步骤
+## 实验操作步骤
 
-### 8.1 编译工程
+### 编译工程
 
 使用当前开发环境编译工程，确认无编译错误。
 
-### 8.2 烧录程序
+### 烧录程序
 
 通过 ST-Link 将编译生成的 `.elf` 或 `.bin` 文件下载到 STM32 开发板。
 
-### 8.3 连接电脑
+### 连接电脑
 
 使用 USB 数据线将开发板的 USB 口（PA11/PA12 对应的接口）连接到电脑。
 
-### 8.4 查看 COM 口
+### 查看 COM 口
 
 打开设备管理器，展开"端口（COM 和 LPT）"，确认出现 `STMicroelectronics Virtual COM Port (COMx)`，记录 COM 口编号。
 
-### 8.5 用串口调试助手验证单片机输出
+### 用串口调试助手验证单片机输出
 
 打开串口调试助手（如 SSCOM、PuTTY 等），选择对应 COM 口，打开串口。如果一切正常，应看到单片机持续发送的 ADC 原始值：
 
@@ -621,13 +621,13 @@ temp = (1430 - mv) / 4.3 + 25    # 电压 → 温度 (°C)
 
 这一步的目的是**先验证单片机端软硬件工作正常**（TSVREFE 使能、ADC 连续转换、DMA 循环传输、USB CDC 发送均正确），再进入 Python 客户端环节。
 
-### 8.6 安装 Python 依赖
+### 安装 Python 依赖
 
 ```bash
 pip install pyserial matplotlib
 ```
 
-### 8.7 运行 Python 客户端
+### 运行 Python 客户端
 
 ```bash
 python client/temperature_monitor.py
@@ -640,9 +640,9 @@ python client/temperature_monitor.py
 
 客户端应实时显示温度曲线，当前温度值显示在右上角。波形应连续无断点，温度值在合理范围内波动。
 
-![Python 客户端温度曲线](img/6客户端.png)
+![Python 客户端温度曲线](img/6客户端.png){ width=72% }
 
-### 8.8 记录实验结果
+### 记录实验结果
 
 建议在实验报告中保留以下截图：
 1. CubeMX 配置截图（ADC1、DMA、时钟树、USB CDC 各至少 1 张）。
@@ -652,9 +652,9 @@ python client/temperature_monitor.py
 
 ---
 
-## 9. 实验现象与结果分析
+## 实验现象与结果分析
 
-### 9.1 预期现象
+### 预期现象
 
 1. 电脑成功识别到 STM32 虚拟串口设备。
 2. Python 客户端启动后，点击 Start，温度曲线立即开始滚动。
@@ -662,7 +662,7 @@ python client/temperature_monitor.py
 4. 调整时间量程，可观察到不同时间尺度下的温度波动情况。
 5. 长时间运行（数分钟）可观察到芯片从冷启动到热平衡的温升过程。
 
-### 9.2 结果分析
+### 结果分析
 
 1. **DMA 循环传输正常**：曲线连续无断点，说明 ADC → DMA → 回调 → VCP 的数据管道工作正常。
 2. **时钟配置正确**：USB 设备能在设备管理器中正确枚举，说明 48 MHz USB 时钟精度满足要求。
@@ -674,7 +674,7 @@ python client/temperature_monitor.py
 
 ---
 
-## 10. 常见问题排查
+## 常见问题排查
 
 | 问题 | 可能原因与解决方案 |
 | :--- | :--- |
@@ -689,7 +689,7 @@ python client/temperature_monitor.py
 
 ---
 
-## 11. 课后思考题
+## 课后思考题
 
 请结合本次实验，在报告中认真回答以下问题：
 
@@ -700,9 +700,9 @@ python client/temperature_monitor.py
 
 ---
 
-## 12. 实验报告提交要求
+## 实验报告提交要求
 
-### 12.1 报告建议结构
+### 报告建议结构
 
 1. **封面**：课程名称、作业名称、姓名、学号、班级、日期。
 2. **作业目标**：简述本实验需要实现的 ADC + DMA + VCP 连续数据采集功能。
@@ -718,19 +718,19 @@ python client/temperature_monitor.py
 12. **课后思考题答案**：必须完整回答本 README 中 4 个思考题。
 13. **总结**：概括你对 STM32 ADC + DMA + USB CDC 数据采集系统的理解。
 
-### 12.2 图片与流程图要求
+### 图片与流程图要求
 
 1. 报告中至少包含 3 类图片：CubeMX 配置截图（含 DMA 配置）、时钟树截图、Python 客户端运行截图。
 2. 每张图片必须标注图号和图题，并在正文中引用说明。
 3. 程序流程图必须单独成图，不能只用文字描述替代。
 
-### 12.3 提交规范
+### 提交规范
 
 1. 报告文件建议命名为：`学号-姓名-作业10-DMA温度传感器实验.pdf`。
 2. 若实验未完全成功，也必须提交完整报告，重点说明失败现象、原因分析和改进方向。
 3. 报告中不能只贴代码或截图，必须结合实验现象进行解释和分析。
 
-### 12.4 最低验收标准
+### 最低验收标准
 
 1. 电脑能够识别出虚拟串口设备。
 2. Python 客户端能够接收到连续的数据流。
@@ -740,7 +740,7 @@ python client/temperature_monitor.py
 
 ---
 
-## 13. 可进一步扩展的方向
+## 可进一步扩展的方向
 
 1. **VREFINT 校正**：参考作业 9，增加 VREFINT 通道的动态切换采集，用内部参考电压校正 VDDA 偏差，提高温度测量精度。
 2. **出厂校准值校正**：STM32F103 在 Flash 中存储了 TS_CAL1（30°C 时的 ADC 值），可利用此值结合 VREFINT 进行更高精度的温度校准。
@@ -752,7 +752,7 @@ python client/temperature_monitor.py
 
 ---
 
-## 14. 总结
+## 总结
 
 本实验不同于作业 9 的"轮询 + 每秒一次"模式，而是使用 **ADC 连续转换 + DMA 循环传输**实现了**全自动高频数据采集**。这个架构的关键理解点在于：
 

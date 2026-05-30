@@ -35,7 +35,6 @@
 
 > **注意：MISO 交叉连接。** SPI 的 MISO 含义是 Master In Slave Out。连接时，主机的 MOSI（PA7）对从机的 MOSI（PB15），主机的 MISO（PA6）对从机的 MISO（PB14）——但这里"从机 MISO"是**从机输出**，所以交叉后正好实现主机发送→从机接收，从机发送→主机接收。
 
-![SPI 回环实物连接](img/loopback_connection.jpg)
 
 > **速度选择。** 本实验 SPI1 波特率预分频器设为 64，即 72MHz / 64 = **1.125 Mbps**。回环测试中信号完整性问题较少，可使用较高速率。实际外部 SPI 设备（如 Flash、传感器）通常支持 1~10 Mbps。
 
@@ -189,7 +188,7 @@ SPI 是全双工总线：在 SCK 的驱动下，主机和从机**同时**通过 
 4. **Application Structure:** Basic
 5. **Toolchain / IDE:** 选择 **CMake**（配合 VS Code + ARM GCC 使用）
 
-![工程配置](img/6ProjectManager.png)
+![工程配置](img/6ProjectManager.png){ width=72% }
 
 ### 4.8 生成代码
 
@@ -395,7 +394,7 @@ while (1)
 
 - 第二次运行到断点：`master_tx=0x5A`, `master_rx=0xA5`, `slave_tx=0xA5`, `slave_rx=0x5A`
 
-![第二次断点](img/8调试窗口.png)
+![第二次断点](img/8调试窗口.png){ width=72% }
 
 ### 6.6 SPI1 初始化（主机）
 

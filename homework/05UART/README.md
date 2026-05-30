@@ -1,4 +1,4 @@
-# 05UART — STM32 UART 串口通信实验
+# STM32 UART 串口通信实验
 
 ## 1. 实验概述
 
@@ -52,7 +52,7 @@
 
 > **说明：** STM32F103C8T6 核心板通常板载 8MHz 晶振，通过 HSE + PLL 倍频到 72MHz 作为系统主频。
 
-![RCC 配置](img/rcc.png)
+![RCC 配置](img/rcc.png){ width=72% }
 
 ### 3.3 配置调试接口（SYS）
 
@@ -61,7 +61,7 @@
 
 > **为什么要这样做？** STM32F103 默认同时启用 JTAG 和 SWD。关闭 JTAG 只保留 SWD 不仅节省引脚（PA15、PB3、PB4 可作普通 GPIO），SWD 本身也足以完成烧录和调试。
 
-![SYS 配置](img/sys.png)
+![SYS 配置](img/sys.png){ width=72% }
 
 ### 3.4 配置 USART1
 
@@ -76,7 +76,7 @@
 
 > **关键概念：异步串口 (Asynchronous UART)** 是最常见的串口模式，仅需 TX、RX 两根信号线。同步模式 (Synchronous USART) 还需 CLK 时钟线，本实验不涉及。
 
-![USART1 配置](img/usart.png)
+![USART1 配置](img/usart.png){ width=72% }
 
 ### 3.5 配置 GPIO（PC13 LED）
 
@@ -90,7 +90,7 @@
 
 > **为什么要用开漏模式？** STM32F103C8T6 核心板的 LED 通常连接在 PC13 与 VDD 之间，因此 PC13 输出 **低电平** 时 LED 点亮，输出 **高阻态**（开漏输出高）时 LED 熄灭。使用推挽输出（Push-Pull）也可以正常工作，但开漏模式在此场景下更安全，可避免因灌电流过大损坏引脚。
 
-![GPIO 配置](img/gpio.png)
+![GPIO 配置](img/gpio.png){ width=72% }
 
 ### 3.6 配置时钟树（Clock Configuration）
 
@@ -106,7 +106,7 @@
 
 > **为什么 APB1 要二分频？** STM32F103 的 APB1 总线最高频率为 36MHz，因此必须对 72MHz 的 AHB 进行二分频。而 APB2 总线最高可达 72MHz，所以无需分频。USART1 挂在 APB2 总线上。
 
-![时钟树配置](img/clock.png)
+![时钟树配置](img/clock.png){ width=72% }
 
 ### 3.7 配置工程输出
 

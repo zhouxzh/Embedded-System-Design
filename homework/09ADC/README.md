@@ -1,4 +1,4 @@
-# 作业9：STM32 ADC 内置温度传感器采集与虚拟串口传输实验
+# STM32 ADC 内置温度传感器采集与虚拟串口传输实验
 
 ## 统一作业说明
 
@@ -252,6 +252,8 @@ ADC 内部有一个采样保持电容，在采样阶段需要对该电容充电�
 
 ![工程管理器](img/08ProjectManager.png)
 
+以上界面确认无误后即可继续后续硬件连接与代码说明。
+
 ---
 
 ## 5. 硬件连接要点
@@ -362,9 +364,9 @@ while (1)
                        adc_ts, adc_vref,
                        vdda_mv / 1000, vdda_mv % 1000,
                        v_ts_raw_mv / 1000, v_ts_raw_mv % 1000,
-                       temp_raw_x10 / 10, (temp_raw_x10 < 0 ? -temp_raw_x10 : temp_raw_x10) % 10,
+                       temp_raw_x10 / 10, (temp_raw_x10 < 0 (1) -temp_raw_x10 : temp_raw_x10) % 10,
                        v_ts_cal_mv / 1000, v_ts_cal_mv % 1000,
-                       temp_cal_x10 / 10, (temp_cal_x10 < 0 ? -temp_cal_x10 : temp_cal_x10) % 10);
+                       temp_cal_x10 / 10, (temp_cal_x10 < 0 (1) -temp_cal_x10 : temp_cal_x10) % 10);
     CDC_Transmit_FS((uint8_t *)msg, len);
 
     HAL_Delay(1000);
@@ -559,7 +561,7 @@ static void SystemClock_Config(void)
 2. 展开**端口（COM 和 LPT）**。
 3. 确认出现新设备（如 `STMicroelectronics Virtual COM Port (COMx)`），并记录 COM 口编号。
 
-![设备管理器](img/09设备管理器.png)
+![设备管理器](img/09设备管理器.png){ width=72% }
 
 ### 8.5 打开串口调试助手
 
@@ -583,7 +585,7 @@ TS=1634 VREF=1429 VDDA=3.439V | Uncal: V=1.316V T=51.5C | Cal: V=1.372V T=38.5C
 - `Uncal`：未校正（假设 VDDA = 3.3V）的电压和温度
 - `Cal`：用实际 VDDA 校正后的电压和温度
 
-![串口调试助手](img/10串口调试助手.png)
+![串口调试助手](img/10串口调试助手.png){ width=72% }
 
 ### 8.7 记录实验结果
 

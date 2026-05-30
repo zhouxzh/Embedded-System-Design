@@ -1,4 +1,4 @@
-# 作业1：STM32 GPIO 输入输出实验
+﻿# STM32 GPIO 输入输出实验
 
 ## 统一作业说明
 
@@ -47,25 +47,30 @@
 
 ## STM32CubeMX 配置步骤
 
-### 1. 新建工程
+### 新建工程
 
 1. 打开 STM32CubeMX，点击 **File → New Project**
 2. 在芯片选择界面搜索 `STM32F103C8T6`，选中后点击 **Start Project**
-![新建工程](img/1.png)
 
-### 2. 配置系统时钟（RCC）
+![新建工程](img/1.png){ width=72% }
+
+### 配置系统时钟（RCC）
 
 1. 左侧 **Pinout & Configuration → System Core → RCC**
 2. **High Speed Clock (HSE)** 选择 `Disable`（使用内部 HSI，8 MHz）
-![关闭使用内部时钟](img/2.png)
-3. 切换到 **Clock Configuration** 标签页，确认 SYSCLK 来源为 HSI，频率为 8 MHz
-![使用晶振](img/3.png)
 
-### 3. 配置调试接口（SYS）
+![关闭使用内部时钟](img/2.png){ width=72% }
+
+3. 切换到 **Clock Configuration** 标签页，确认 SYSCLK 来源为 HSI，频率为 8 MHz
+
+![使用晶振](img/3.png){ width=72% }
+
+### 配置调试接口（SYS）
 
 1. 左侧 **Pinout & Configuration → System Core → SYS**
 2. **Debug** 下拉菜单选择 `Serial Wire`
-![debug](img/7.png)
+
+![debug](img/7.png){ width=72% }
 
 **为什么必须选择 Serial Wire：**
 
@@ -130,7 +135,7 @@ Blue Pill 板上有两个跳线帽，标注 `BOOT0` 和 `BOOT1`，拨到 `0` 侧
 
 > 此方法成功率取决于时序配合，需要多试几次。若多次失败，则改用串口 ISP（BOOT0 拉高）方式恢复。
 
-### 4. 配置 GPIO 引脚
+### 配置 GPIO 引脚
 
 #### **PC13（LED 输出）：**
 1. 在芯片引脚图上点击 **PC13**，选择 `GPIO_Output`
@@ -148,9 +153,9 @@ Blue Pill 板上有两个跳线帽，标注 `BOOT0` 和 `BOOT1`，拨到 `0` 侧
    - GPIO Pull-up/Pull-down：`Pull-up`（上拉）
    - User Label：`KEY`（可选）
 
-![配置GPIO](img/4.png)
+![配置GPIO](img/4.png){ width=72% }
 
-### 4. 配置工程输出
+### 配置工程输出
 
 1. 切换到 **Project Manager** 标签页
 2. **Project** 子页：
@@ -167,16 +172,19 @@ Blue Pill 板上有两个跳线帽，标注 `BOOT0` 和 `BOOT1`，拨到 `0` 侧
      | `CMake` | 生成 CMakeLists.txt，跨平台构建系统 | VSCode + STM32 插件 |
 
      **本实验选择 `CMake`**，原因是使用 VSCode 配合 **STM32 VS Code Extension** 插件`STM32CubeIDE for VS Code`进行开发。该插件原生支持 CMake 工程，可在 VSCode 中直接完成编译、烧录和调试，无需安装 STM32CubeIDE 或 Keil。
-   ![保存工程文件](img/5.png)
+
+![保存工程文件](img/5.png){ width=72% }
+
 3. **Code Generator** 子页：
    - 勾选 **Generate peripheral initialization as a pair of '.c/.h' files per peripheral**（可选）
-   ![生成代码](img/6.png)
 
-### 5. 生成代码
+![生成代码](img/6.png){ width=72% }
+
+### 生成代码
 
 点击右上角 **GENERATE CODE**，CubeMX 自动生成包含 `MX_GPIO_Init` 的工程框架。
 
-### 6. 添加用户代码
+### 添加用户代码
 
 在生成的 `Core/Src/main.c` 中，找到 `while (1)` 循环内的 `USER CODE BEGIN 3` 注释区域，添加：
 
@@ -189,7 +197,7 @@ HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, key_state);
 
 ## 核心代码解析
 
-### 1. GPIO 初始化（`MX_GPIO_Init`）
+### GPIO 初始化（`MX_GPIO_Init`）
 
 ```c
 // 使能 GPIO 时钟
@@ -214,7 +222,7 @@ HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 - 使用 GPIO 外设前必须先使能对应端口的时钟，否则寄存器写入无效。
 - `GPIO_InitTypeDef` 结构体复用时，只需重新赋值需要改变的字段，再调用 `HAL_GPIO_Init`。
 
-### 2. 主循环逻辑
+### 主循环逻辑
 
 ```c
 while (1)

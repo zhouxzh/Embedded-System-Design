@@ -1,4 +1,4 @@
-# 作业4：STM32 USB 虚拟串口通信实验
+# STM32 USB 虚拟串口通信实验
 
 ## 统一作业说明
 
@@ -78,7 +78,7 @@
 1. 便于后续通过 ST-Link 下载和调试程序。
 2. 如果未正确配置调试接口，后续可能出现芯片无法正常调试的问题。
 
-![debug](img/1.png)
+![debug](img/1.png){ width=72% }
 
 ### 3.3 配置高速外部时钟（RCC）
 
@@ -86,7 +86,7 @@
 
 这样做的目的是为 PLL 和 USB 提供稳定时钟来源。
 
-![RCC](img/2.png)
+![RCC](img/2.png){ width=72% }
 
 ### 3.4 启用 USB 外设（Connectivity）
 
@@ -94,7 +94,7 @@
 
 此步骤的作用是启用芯片的 USB 设备功能，使 STM32 作为一个 USB 外设被电脑识别。
 
-![usb](img/3.png)
+![usb](img/3.png){ width=72% }
 
 ### 3.5 配置 USB 中间件（Middleware）
 
@@ -105,7 +105,7 @@
 1. 告诉 CubeMX 当前 USB 设备要工作在 CDC 类。
 2. 生成 USB 虚拟串口所需的描述符、接口文件和中间件代码。
 
-![VPC](img/4.png)
+![VPC](img/4.png){ width=72% }
 
 ### 3.6 配置时钟树（Clock Configuration）
 
@@ -117,7 +117,7 @@
 
 随后检查 PLL 与 USB 时钟分配结果，确保 USB 时钟精确为 48MHz。
 
-![clock](img/6.png)
+![clock](img/6.png){ width=72% }
 
 ### 3.7 配置工程并生成代码
 
