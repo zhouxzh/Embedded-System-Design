@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:zhouxzh.github.io)",
+      "Read(//d/Github/Ascend310/src/experiment/**)"
+    ]
+  }
+}
