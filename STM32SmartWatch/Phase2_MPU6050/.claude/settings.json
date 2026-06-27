@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xxd -l 500 -c 16 \"d:/Github/Embedded-System-Design/STM32SmartWatch/Phase2_MPU6050/Core/Src/main.c\")",
+      "Bash(cmake --build build/Debug)"
+    ]
+  }
+}

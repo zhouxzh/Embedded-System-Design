@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls build/Debug/)",
+      "Bash(which arm-none-eabi-gcc *)",
+      "Bash(\"c:/Users/zhoux/.vscode/extensions/stmicroelectronics.stm32cube-ide-build-cmake-1.45.0-win32-x64/resources/cube-cmake/win32/x86_64/cube-cmake.exe\" -S . -B build/Debug -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/gcc-arm-none-eabi.cmake -DCMAKE_BUILD_TYPE=Debug)",
+      "Bash(python3 -c \"from PIL import Image, ImageFont, ImageDraw; print\\('PIL OK'\\)\")",
+      "Bash(python -c \"from PIL import Image, ImageFont, ImageDraw; print\\('PIL OK'\\)\")",
+      "Bash(where python3 *)",
+      "Bash(where py *)",
+      "Bash(py --version)",
+      "Read(//c/Users/zhoux/AppData/Local/Programs/**)",
+      "Read(//c/Users/zhoux/anaconda3/**)",
+      "Read(//c/Users/zhoux/Anaconda3/**)",
+      "Read(//c/Users/zhoux/miniconda3/**)",
+      "Bash(cmd.exe /c \"dir /b /s C:\\\\Users\\\\zhoux\\\\anaconda*\\\\python.exe 2>nul\")",
+      "Read(//c/ProgramData/anaconda3/**)",
+      "Bash(conda --version)",
+      "Bash(\"C:/Users/zhoux/anaconda3/python.exe\" --version)",
+      "Bash(\"C:/Users/zhoux/anaconda3/python.exe\" -c \"from PIL import Image, ImageFont, ImageDraw; print\\('PIL OK'\\)\")",
+      "Bash(\"C:/Users/zhoux/anaconda3/python.exe\" python/gen_font_12x12.py)"
+    ]
+  }
+}
