@@ -2,125 +2,211 @@
 
 ## 目标
 
-在 Phase 2（OLED + MPU6050 可用）的基础上新增 HC-05 蓝牙模块，通过蓝牙向手机发送传感器数据。
+在 Phase 2（OLED + MPU6050 可用）的基础上新增 HC-05 蓝牙数据链路。STM32 通过 `USART2` 向 HC-05 发送传感器数据，上位机通过蓝牙串口接收并显示曲线。
 
-## 硬件连接（叠加在 Phase 2 之上）
+HC-05 的 AT 模式、改名、从机模式、数据模式波特率等配置统一参考 [Phase0_HC05Setting/README.md](../Phase0_HC05Setting/README.md)，本阶段不重复编写 AT 配置流程。
 
-蓝牙使用 UART 接口，与 I2C 总线完全独立：
+## 接线速查
 
-| HC-05 模块 | STM32F103C8T6 |
-|-----------|---------------|
-| VCC | 3.3V（不要用 5V） |
-| GND | GND |
-| TXD | PA10 (USART1_RX) |
-| RXD | PA9 (USART1_TX) |
+| STM32F103C8T6 | HC-05 | 说明 |
+|---|---|---|
+| `5V` | `VCC` | HC-05 模块供电建议接 5 V，可从 ST-LINK 的 5V 引脚取电 |
+| `GND` | `GND` | 必须共地 |
+| `PA2` (`USART2_TX`) | `RXD` | 交叉连接：STM32 发送 -> HC-05 接收 |
+| `PA3` (`USART2_RX`) | `TXD` | 交叉连接：HC-05 发送 -> STM32 接收 |
+| `PB0` (`GPIO_Input`) | `STATE` | 连接状态检测，高电平表示已连接 |
+| 不接 | `KEY/EN` | Phase3 正常数据模式不接；AT 配置见 Phase0 |
 
-> TXD → RX，RXD → TX，交叉连接。
+连接要点：
+
+- HC-05 的 `TXD/RXD/STATE` 逻辑电平按 3.3 V 使用，可直接接 STM32F103。
+- HC-05 的 `VCC` 需要稳定 5 V 供电；如果只接 3.3 V，可能会出现搜不到、广播名异常或连接不稳定。
+- `TXD/RXD` 必须交叉连接，不要 TX 对 TX。
+- `STATE` 接 `PB0`，固件实时读取该引脚，并在 OLED 状态栏和蓝牙页面显示连接状态。
+- Phase3 固件默认串口为 `38400 8N1`，请确保 Phase0 中配置后的 HC-05 数据模式串口参数与此一致。
 
 ## STM32CubeMX 配置
 
-打开 Phase 2 的 `.ioc` 文件，在原有基础上新增以下配置。
+在 Phase 2 的 `.ioc` 基础上新增以下配置。本工程当前已经按此配置修改为 `USART2 + PA2/PA3 + PB0`。
 
-### 新增：USART1
+### USART2
 
-**Pinout View：**
-- 将 **PA9** 设为 **USART1_TX**
-- 将 **PA10** 设为 **USART1_RX**
+Pinout View：
 
-**Parameter Settings：**
+| 引脚 | 配置 |
+|---|---|
+| `PA2` | `USART2_TX` |
+| `PA3` | `USART2_RX` |
+
+Parameter Settings：
 
 | 配置项 | 值 |
-|--------|-----|
-| Baud Rate | **115200** |
-| Word Length | **8 Bits** |
-| Parity | **None** |
-| Stop Bits | **1** |
-| Data Direction | **Receive and Transmit** |
-| Over Sampling | **16 Samples** |
+|---|---|
+| Mode | `Asynchronous` |
+| Baud Rate | `38400` |
+| Word Length | `8 Bits` |
+| Parity | `None` |
+| Stop Bits | `1` |
+| Hardware Flow Control | `Disable` |
+| Over Sampling | `16 Samples` |
 
-### 新增：USART1 DMA
+### USART2 DMA
 
-进入 USART1 的 **DMA Settings** 标签页，点击 **Add** 添加两条 DMA 通道：
+在 `USART2 -> DMA Settings` 中添加两条 DMA：
 
-| 通道 | Direction | Mode | 用途 |
-|------|-----------|------|------|
-| DMA1 Channel 4 | Memory To Peripheral | Normal | TX 发送 |
-| DMA1 Channel 5 | Peripheral To Memory | **Circular** | RX 环形接收 |
+| 通道 | Request | Direction | Mode | 用途 |
+|---|---|---|---|---|
+| `DMA1 Channel 7` | `USART2_TX` | Memory To Peripheral | Normal | 蓝牙发送 |
+| `DMA1 Channel 6` | `USART2_RX` | Peripheral To Memory | Circular | 蓝牙接收 |
 
-> RX 用环形模式：DMA 自动循环写入缓冲区，适合不定长的蓝牙数据帧。
+RX 使用环形模式，适合不定长蓝牙数据帧。
 
-### 新增：USART1 中断
+### PB0 STATE 输入
 
-进入 **NVIC Settings** 标签页：
+在 Pinout View 中将 `PB0` 设为 `GPIO_Input`：
+
+| 配置项 | 值 |
+|---|---|
+| GPIO Mode | `Input mode` |
+| GPIO Pull-up/Pull-down | `Pull-down` |
+
+### NVIC
 
 | 中断 | 使能 | Preemption Priority |
-|------|------|---------------------|
-| USART1 global interrupt | ✅ | **5** |
+|---|---|---|
+| `USART2 global interrupt` | Enable | `5` |
+| `DMA1 Channel6 global interrupt` | Enable | `0` |
+| `DMA1 Channel7 global interrupt` | Enable | `0` |
 
-> 注意：Phase 4 引入 FreeRTOS 后优先级可能需要调整，现阶段裸机设为 5 即可。
+Phase 4 引入 FreeRTOS 后可能需要重新整理中断优先级；Phase 3 裸机阶段保持当前配置即可。
 
-### GENERATE CODE
+## 本阶段外设总览
 
-点击 **GENERATE CODE** 重新生成。
+| 外设 | 引脚 | 功能 |
+|---|---|---|
+| `I2C1` | `PB6` SCL, `PB7` SDA | OLED SSD1306 `0x3C` |
+| `I2C2` | `PB10` SCL, `PB11` SDA | MPU6050 `0x68` |
+| `USART2` | `PA2` TX, `PA3` RX | HC-05 蓝牙串口 `38400 8N1` |
+| `GPIO` | `PB0` Input Pull-down | HC-05 `STATE` |
+| `SWD` | `PA13` SWDIO, `PA14` SWCLK | 下载和调试 |
 
-> 确保你在 `USER CODE BEGIN` / `USER CODE END` 之间的 Phase 1、Phase 2 代码未被覆盖。
+## 数据帧格式
 
-## 本阶段 CubeMX 配置汇总
+STM32 和上位机使用同一套二进制帧协议：
 
-```
-Phase 1 已有：
-  ✅ I2C1     — Fast Mode 400kHz  (PB6/PB7)
-  ✅ SYS      — Serial Wire, SysTick 时基
-  ✅ RCC      — HSE 8MHz, 72MHz
-
-Phase 3 新增：
-  ✅ USART1   — 115200-8-N-1  (PA9/PA10)
-  ✅ DMA1     — CH4 TX / CH5 RX (Circular)
-  ✅ NVIC     — USART1 interrupt, Priority 5
-
-尚未启用（Phase 4 加入）：
-  ❌ TIM2     — 秒中断计时
-  ❌ TIM3     — 编码器模式
-  ❌ FreeRTOS — 多任务调度
-```
-
-## HC-05 AT 配置（首次使用必须做）
-
-HC-05 默认波特率是 **9600**，需要改为 **115200** 才能与本项目配置匹配。
-
-**方法一（推荐）：用 USB 转串口模块在电脑上配置**
-
-1. HC-05 上电时按住按键 → LED 慢闪（进入 AT 模式）
-2. 串口助手发送 `AT\r\n` → 回复 `OK`
-3. 发送 `AT+UART=115200,0,0\r\n` → 回复 `OK`
-4. 发送 `AT+NAME=SmartWatch\r\n` → 回复 `OK`
-5. 重新上电（不按按键）→ 退出 AT 模式
-
-**方法二：用 STM32 代码配置**
-
-在 main 函数初始化阶段发送 AT 指令（代码需先以 9600 波特率与 HC-05 通信，配置完成后再切换为 115200）。
-
-## 自定义数据帧格式
-
-```
+```text
 [STX] [CMD] [LEN] [DATA...] [CHK] [ETX]
- 0xAA  1B    1B    N 字节    1B    0x55
+ 0xAA  1B    1B    N bytes   1B    0x55
 
 CHK = CMD ^ LEN ^ DATA[0] ^ ... ^ DATA[N-1]
 ```
 
+命令：
+
+| CMD | 方向 | DATA |
+|---|---|---|
+| `0x01` | STM32 -> 上位机 | 6 个 little-endian `float`：`ax ay az gx gy gz` |
+| `0x02` | 上位机 -> STM32 | 7 字节时间：`hour min sec year_H year_L month day` |
+| `0x03` | 预留 | ACK |
+
+## 上位机
+
+`smartwatch_bt_host/` 中提供两个上位机：
+
+| 文件 | 场景 |
+|---|---|
+| `ble_host.py` | `hc05V2.3_le` 这类 BLE 模块，Windows 不生成虚拟 COM 口时使用 |
+| `bt_host.py` | 传统经典蓝牙 HC-05/HC-06，Windows 能生成虚拟 COM 口时使用 |
+| `web_host.py` | PC 蓝牙兼容性不好时，用 Linux/香橙派通过 BlueZ + RFCOMM 中转 |
+
+### 安装依赖
+
+```powershell
+conda create -n stm32 python=3.13 -y
+conda activate stm32
+cd smartwatch_bt_host
+pip install -r requirements.txt
+```
+
+### Windows BLE 上位机（适合 hc05V2.3_le）
+
+如果 AT 日志中看到类似 `+VERSION:hc05V2.3_le`、`+PSWD:NO KEY OK`，说明模块更像 BLE 透传模块，不是传统 SPP 串口 HC-05。此时 Windows 通常不会生成 `COMx`，请使用 BLE 上位机：
+
+```powershell
+conda activate stm32
+cd smartwatch_bt_host
+python ble_host.py
+```
+
+使用流程：
+
+1. 让 HC-05 正常数据模式上电。
+2. 点击 `Scan` 开始持续扫描，设备列表会实时刷新，等待列表中出现 `SMARTWATCH`。
+3. 扫描会一直进行，直到点击 `Stop Scan`。
+4. 选择 `SMARTWATCH` 后点击 `Connect`。
+5. 连接成功后右侧会显示 BLE Service/Characteristic。
+6. 如果模块的 BLE 透传特征支持 notify，上位机会自动接收数据，并按现有 `0xAA ... 0x55` 帧协议解析。
+
+BLE 上位机会把最近一次连接成功的设备保存到 `smartwatch_bt_host/.ble_last_device.json`。以后重新打开程序时，下拉框会自动出现 cached 设备，通常可直接点 `Connect`，不必重新扫描；如果连接失败，再点 `Scan` 刷新一次即可。
+
+如果能连接但 `Frames` 不增长，查看 `Raw Log` 和 `BLE Services`，需要根据实际可通知/可写特征继续适配。
+
+### Windows 经典蓝牙串口上位机
+
+```powershell
+conda activate stm32
+cd smartwatch_bt_host
+python bt_host.py
+```
+
+使用流程：
+
+1. Windows 设置中先与 HC-05 配对。
+2. 系统一般会生成两个虚拟 COM 口，一个传入、一个传出。
+3. 在上位机中选择 HC-05 对应 COM 口并点击 `Connect`。
+4. 如果 `Frames` 增长、曲线滚动，说明选对了端口；如果一直为 0，换另一个 COM 口。
+5. 需要同步时间时点击 `Send PC Time to Watch`。
+
+### 香橙派 / Linux Web 上位机
+
+详细配对、绑定和排查步骤见 [smartwatch_bt_host/README.md](smartwatch_bt_host/README.md)。
+
+简要启动：
+
+```bash
+cd smartwatch_bt_host
+python web_host.py
+```
+
+浏览器打开：
+
+```text
+http://<设备IP>:5000
+```
+
+常用环境变量：
+
+| 变量 | 默认值 | 说明 |
+|---|---|---|
+| `BT_DEVICE` | `/dev/rfcomm0` | 蓝牙串口设备 |
+| `BT_BAUDRATE` | `38400` | 串口波特率 |
+| `WEB_PORT` | `5000` | Web 服务端口 |
+
 ## 验证标准
 
-- 手机蓝牙搜索到 HC-05（设备名 "SmartWatch" 或 "HC-05"）
-- 手机蓝牙串口 APP 连接后持续收到传感器数据帧
-- OLED 显示不受蓝牙影响（Phase 2 功能保持正常）
-- 手机发送时间同步指令，STM32 能正确解析并响应
+- 手机或 PC 能搜索并连接自己的 HC-05 设备。
+- HC-05 连接后 `STATE` 输出高电平，OLED 状态栏显示 `BT`。
+- OLED 蓝牙页面显示 `CONNECTED`。
+- 上位机连接后 `Frames` 持续增长，曲线和数值刷新。
+- OLED 和 MPU6050 功能不受蓝牙发送影响。
 
-### 常见问题
+## 常见问题
 
 | 问题 | 检查项 |
-|------|--------|
-| 搜索不到蓝牙 | HC-05 供电是否 3.3V、LED 是否闪烁 |
-| 连上后无数据 | TX/RX 是否交叉连接、波特率是否 115200 |
-| 数据乱码 | 波特率不匹配（HC-05 可能仍是 9600） |
-| OLED 刷新变慢 | USART 中断优先级是否过高阻塞了主循环 |
+|---|---|
+| 搜不到 HC-05 | 优先检查 HC-05 `VCC` 是否接 5 V（可从 ST-LINK 取 5V），再检查 LED 状态和是否处于正常数据模式 |
+| 搜到多个同名设备 | 先用 Phase0 给模块改唯一名称，或只保留自己的模块上电配对 |
+| 连上后无数据 | 检查 `PA2 -> RXD`、`PA3 <- TXD` 是否交叉，检查 HC-05 数据模式是否为 `38400 8N1` |
+| OLED 不显示 BT | 检查 `STATE -> PB0`，以及 PB0 是否下拉输入 |
+| 数据乱码 | HC-05 数据模式串口参数与固件不一致，回到 Phase0 检查配置 |
+| 重新 Generate Code 后配置丢失 | 确认 `.ioc` 中仍为 `USART2`、`PA2/PA3`、`PB0`、`DMA1 Channel6/7` |

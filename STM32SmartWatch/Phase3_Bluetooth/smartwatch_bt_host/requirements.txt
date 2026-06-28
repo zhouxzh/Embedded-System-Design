@@ -1,0 +1,5 @@
+pyserial>=3.5
+matplotlib>=3.7
+flask>=3.0
+flask-socketio>=5.3
+bleak>=0.22

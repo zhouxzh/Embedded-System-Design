@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phase0 HC-05 AT VCP Host</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <h1>HC-05 AT 配置台</h1>
+        <p>STM32 USB VCP -> USART2 -> HC-05</p>
+      </div>
+      <div class="status" id="statusPill">
+        <span class="dot"></span>
+        <span id="statusText">Disconnected</span>
+      </div>
+    </header>
+
+    <section class="layout">
+      <aside class="side">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>连接</h2>
+            <button class="ghost" id="refreshBtn">刷新</button>
+          </div>
+          <label class="field">
+            <span>COM 口</span>
+            <select id="portSelect"></select>
+          </label>
+          <div class="row">
+            <button class="primary" id="connectBtn">连接</button>
+            <button id="disconnectBtn">断开</button>
+          </div>
+          <div class="meta" id="portHint">等待扫描串口</div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>快捷命令</h2>
+          </div>
+          <div class="grid-buttons">
+            <button data-command="/ping">Ping STM32</button>
+            <button data-command="AT">AT Test</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <section class="terminal-panel">
+          <div class="terminal-head">
+            <div>
+              <h2>串口日志</h2>
+              <span id="logMeta">0 lines</span>
+            </div>
+            <button class="ghost" id="clearBtn">清空</button>
+          </div>
+          <pre id="logView" class="terminal"></pre>
+        </section>
+
+        <section class="commandbar">
+          <input id="commandInput" value="AT" autocomplete="off">
+          <button class="primary" id="sendBtn">发送</button>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

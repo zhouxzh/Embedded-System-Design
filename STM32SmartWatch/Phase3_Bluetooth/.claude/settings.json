@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"d:\\\\Github\\\\Embedded-System-Design\\\\STM32SmartWatch\\\\\")",
+      "Read(//d/Github/Embedded-System-Design/**)",
+      "Bash(ls -la \"d:\\\\Github\\\\Embedded-System-Design\\\\STM32SmartWatch\\\\Phase3_Bluetooth\\\\\")",
+      "Read(//d/Github/Embedded-System-Design/STM32SmartWatch/**)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('python_host/bt_protocol.py'\\).read\\(\\)\\); print\\('bt_protocol.py: OK'\\)\")",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('python_host/bt_host.py'\\).read\\(\\)\\); print\\('bt_host.py: OK'\\)\")",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('d:/Github/Embedded-System-Design/STM32SmartWatch/Phase3_Bluetooth/python_host/bt_protocol.py'\\).read\\(\\)\\); print\\('bt_protocol.py: OK'\\)\")",
+      "Bash(where python3 *)",
+      "Bash(where py *)",
+      "Bash(ssh HwHiAiUser@orangepiaipro \"mkdir -p ~/Documents/smartwatch_bt_host/templates\")"
+    ]
+  }
+}

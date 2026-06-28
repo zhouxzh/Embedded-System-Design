@@ -1,0 +1,269 @@
+:root {
+  --bg: #f5f7fb;
+  --panel: #ffffff;
+  --panel-2: #eef3f8;
+  --text: #1b2430;
+  --muted: #657384;
+  --border: #d7e0ea;
+  --accent: #176b87;
+  --accent-2: #1f8a70;
+  --danger: #b42318;
+  --terminal: #101820;
+  --terminal-text: #d7f7e8;
+  --host: #8bd3ff;
+  --preset: #ffd166;
+  --stm32: #c7f9cc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  min-height: 36px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+
+.ghost {
+  background: transparent;
+}
+
+.wide {
+  width: 100%;
+}
+
+.shell {
+  width: min(1180px, calc(100vw - 28px));
+  margin: 0 auto;
+  padding: 18px 0;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 26px;
+  line-height: 1.2;
+}
+
+.topbar p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 6px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.status.connected {
+  color: var(--accent-2);
+  border-color: #9fdcc7;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #9aa8b6;
+}
+
+.status.connected .dot {
+  background: var(--accent-2);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 330px minmax(0, 1fr);
+  gap: 14px;
+  min-height: calc(100vh - 96px);
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel,
+.terminal-panel,
+.commandbar {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.panel {
+  padding: 12px;
+}
+
+.panel-head,
+.terminal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  font-size: 15px;
+}
+
+.field {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.field span,
+.meta,
+#logMeta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+input,
+select {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: white;
+  color: var(--text);
+  padding: 0 10px;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid rgba(23, 107, 135, 0.18);
+  border-color: var(--accent);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.grid-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-rows: minmax(360px, 1fr) auto;
+  min-width: 0;
+  gap: 12px;
+}
+
+.terminal-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  padding: 12px;
+  min-height: 0;
+}
+
+.terminal {
+  margin: 0;
+  min-height: 0;
+  overflow: auto;
+  border-radius: 6px;
+  background: var(--terminal);
+  color: var(--terminal-text);
+  padding: 12px;
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.log-host {
+  color: var(--host);
+}
+
+.log-preset {
+  color: var(--preset);
+}
+
+.log-stm32 {
+  color: var(--stm32);
+}
+
+.commandbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px;
+  gap: 10px;
+  padding: 10px;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace {
+    min-height: 560px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
