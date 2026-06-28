@@ -1,178 +1,152 @@
-# SmartWatch Bluetooth Host
+# SmartWatch BLE Host
 
-PC / 香橙派 / 昇腾 310B 蓝牙上位机，连接 HC-05 接收 STM32 手表传感器数据。
+本目录只保留已验证的 Windows BLE 上位机路径，用于连接 hc05V2.3_le 类 BLE 透传模块并接收 STM32 手表传感器数据。
+
+已验证：
+
+- Windows + Bleak
+- BLE notify characteristic `0000ffe1`
+- STM32 USART2 `38400 8N1`
+- 帧格式 `aa 01 18 <24-byte sensor payload> <checksum> 55`
 
 ## 文件说明
 
 | 文件 | 用途 |
-|------|------|
-| `bt_protocol.py` | 帧协议编解码（PC 和 Web 版共用） |
-| `bt_host.py` | PC 桌面版上位机（tkinter + matplotlib） |
-| `web_host.py` | Web 版上位机（Flask + Chart.js），跑在 Linux 上，PC 浏览器访问 |
-| `templates/index.html` | Web 前端界面 |
+|---|---|
+| `ble_host.py` | Windows BLE 图形上位机 |
+| `ble_probe.py` | BLE 扫描和服务探测辅助脚本 |
+| `bt_protocol.py` | 帧协议编解码 |
 | `requirements.txt` | Python 依赖 |
 
----
+运行时文件：
 
-## 环境搭建（Anaconda）
+| 文件 | 说明 |
+|---|---|
+| `.ble_last_device.json` | 最近一次连接成功的 BLE 设备缓存 |
+| `ble_host.log` | 上位机日志 |
 
-所有平台统一用 Anaconda 管理 Python 环境。
+## 安装依赖
 
-```bash
-# 新建虚拟环境（Python 3.13）
+```powershell
 conda create -n stm32 python=3.13 -y
-
-# 激活环境
 conda activate stm32
-
-# 安装依赖
+cd smartwatch_bt_host
 pip install -r requirements.txt
 ```
 
----
+## 启动上位机
 
-## 方式一：PC 桌面版
-
-### 启动
-
-```bash
+```powershell
 conda activate stm32
-python bt_host.py
+cd smartwatch_bt_host
+python ble_host.py
 ```
 
-使用前需要 Windows 蓝牙配对 HC-05。如果 PC 蓝牙无法配对 HC-05（Intel 网卡通病），改用方式二。
+基本流程：
 
----
+1. 蓝牙模块正常数据模式上电。
+2. 首次连接时点击 `Scan`。
+3. 选中 `SMARTWATCH` 或自己的模块名。
+4. 点击 `Connect`。
+5. 连接成功后观察 Raw Log。
 
-## 方式二：Linux Web 版（香橙派 / 昇腾 310B）
-
-### 1. 安装系统依赖
-
-```bash
-sudo apt update
-sudo apt install -y bluez
-```
-
-`web_host.py` 通过 `/dev/rfcomm0` 读写 HC-05。普通用户需要能访问串口设备；一般加入 `dialout` 组即可：
-
-```bash
-sudo usermod -aG dialout $USER
-newgrp dialout
-```
-
-> 如果你当前用户已经在 `dialout` 组里，可以跳过这一步。用 `groups` 查看。
-
-### 2. 蓝牙配对 HC-05
-
-配对前先确认 HC-05 的 `VCC` 接稳定 5 V，不能只接 3.3 V；可从 ST-LINK 的 5V 引脚给 HC-05 供电。供电不足时可能搜不到设备、广播名异常或连接不稳定。
-
-**HC-05 重新上电**（LED 快闪后马上操作，太久会退出可发现状态）。
-
-**第一步：扫描获取 MAC 地址**
-
-```bash
-bluetoothctl power on
-bluetoothctl --timeout 10 scan on
-```
-
-`--timeout 10` 表示 10 秒后自动停止，不需要 `Ctrl+C`。扫描结果中找到 HC-05：
-
-```
-[NEW] Device 4B:63:DA:3A:2C:DB HC-05
-```
-
-记下 MAC 地址。
-
-**第二步：配对（bluetoothctl 交互模式）**
-
-建议进入交互模式完成扫描、配对和信任。`pair` 必须在当前 `bluetoothctl` 会话已经发现 HC-05 之后执行，否则容易报 `Device not available`。
-
-```bash
-bluetoothctl
-```
-
-进入 `[bluetooth]#` 提示符后：
-
-```bash
-power on
-agent on
-default-agent
-scan on
-# 等到出现：[NEW] Device 4B:63:DA:3A:2C:DB HC-05
-pair 4B:63:DA:3A:2C:DB       # 弹 PIN 码直接回车（无需密码）
-trust 4B:63:DA:3A:2C:DB      # 信任设备，之后自动重连
-info 4B:63:DA:3A:2C:DB       # 确认 Paired: yes, Trusted: yes
-scan off
-exit
-```
-
-> 如果提示输入 PIN，优先试 `1234`，不行再试 `0000`；部分 HC-05 模块可以直接回车。
-
-> HC-05 出厂默认名 "HC-05"。如果周围同名设备多，先断电扫一次记下列表，再上电扫一次——**新出现的 MAC 就是你的**。
-
-### 3. 绑定 RFCOMM 串口
-
-HC-05 是经典蓝牙 SPP/RFCOMM 设备，Linux 上最稳的做法是先把它绑定成串口：
-
-```bash
-# 如果已经有旧绑定，先释放；没有旧绑定时失败可以忽略
-sudo rfcomm release /dev/rfcomm0 2>/dev/null || true
-
-# 绑定 HC-05 到 /dev/rfcomm0，channel 通常是 1
-sudo rfcomm bind /dev/rfcomm0 4B:63:DA:3A:2C:DB 1
-
-# 检查绑定状态
-rfcomm -a
-ls -l /dev/rfcomm0
-```
-
-看到类似下面输出就说明绑定成功：
+正常 Raw Log 示例：
 
 ```text
-rfcomm0: 4B:63:DA:3A:2C:DB channel 1 closed
-crw-rw---- 1 root dialout ... /dev/rfcomm0
+rx 0000ffe1 aa 01 18 ... 55
 ```
 
-`closed` 表示当前没有程序打开这个串口，不是失败。启动 Web 上位机后，程序会打开 `/dev/rfcomm0`。
+其中：
 
-### 4. 启动 Web 上位机
+- `aa` 是帧头。
+- `01` 是传感器数据命令。
+- `18` 表示 24 字节 payload，即 6 个 little-endian `float`。
+- 最后 `55` 是帧尾。
 
-程序使用 `pyserial` 打开 `/dev/rfcomm0`，不需要 `pybluez2`。
+## Windows 蓝牙注意事项
 
-```bash
+### 已配对设备不一定能 Scan 到
+
+Windows 上 BLE 的 `Scan` 依赖广播包。设备一旦配对，或者模块当前不处于广播状态，Bleak 可能扫不到它。这不代表模块坏了。
+
+处理方式：
+
+- 如果下拉框里已有 cached 设备，直接选 cached 设备点 `Connect`。
+- 上位机会先尝试短扫描刷新设备对象。
+- 如果短扫描仍找不到，Windows 下会继续尝试按已配对设备地址连接。
+
+### cached 设备
+
+连接成功后，上位机会保存：
+
+```text
+.ble_last_device.json
+```
+
+下次启动时会自动加载为 cached 设备。这个缓存只保存最近一次成功连接的设备名和地址。
+
+如果缓存错了设备，可以关闭程序后删除 `.ble_last_device.json`，再重新 Scan。
+
+### Scan 和 Connect 不要抢占蓝牙适配器
+
+程序在 Connect 前会停止 Scan。手动操作时也建议：
+
+1. 先 `Stop Scan`。
+2. 再点 `Connect`。
+
+部分 Windows 蓝牙适配器无法一边扫描一边稳定连接。
+
+### 只保留一个连接
+
+同一时间只让一个客户端连接模块：
+
+- 不要同时开两个 `ble_host.py`。
+- 不要让手机蓝牙调试工具占用模块。
+- Windows 设置页停留在设备详情页时也可能影响连接。
+
+连接异常时，最稳的恢复顺序：
+
+1. 关闭上位机。
+2. 关闭 Windows 设置里的蓝牙设备页面。
+3. 蓝牙模块重新上电。
+4. 重新启动 `ble_host.py`。
+5. 选 cached 设备连接。
+
+### `00002a05` notify 失败可以忽略
+
+日志中可能出现：
+
+```text
+notify failed 00002a05-0000-1000-8000-00805f9b34fb: Access Denied
+```
+
+这是 BLE Generic Attribute 的 Service Changed 特征，不是数据通道。只要后面出现：
+
+```text
+notify on 0000ffe1-0000-1000-8000-00805f9b34fb
+```
+
+并且 Raw Log 有 `aa 01 18 ... 55`，数据链路就是正常的。
+
+## BLE 探测脚本
+
+如果需要单独查看设备服务：
+
+```powershell
 conda activate stm32
-
-# 默认串口是 /dev/rfcomm0，波特率 38400
-python web_host.py
-
-# 如果你的绑定设备名不同，可以用环境变量指定
-RFCOMM_DEVICE=/dev/rfcomm1 python web_host.py
+cd smartwatch_bt_host
+python ble_probe.py
 ```
 
-在 PC 浏览器打开 `http://<设备IP>:5000`，点击 **Connect** 开始接收数据。如果自动连接失败，检查 `/dev/rfcomm0` 是否存在、当前用户是否在 `dialout` 组、HC-05 是否上电且没有被手机或其他设备占用。
+注意：如果设备已经配对但不广播，`ble_probe.py` 也可能扫不到它。此时优先用 `ble_host.py` 的 cached Connect。
 
-> 默认绑定 MAC `4B:63:DA:3A:2C:DB`、channel `1`、串口 `/dev/rfcomm0`、波特率 `38400`。可通过 `BT_MAC`、`BT_CHANNEL`、`RFCOMM_DEVICE`、`BT_BAUDRATE` 环境变量覆盖。
+## 常见问题
 
----
-
-## 蓝牙排查
-
-```bash
-# 查看已配对的设备
-bluetoothctl devices
-
-# 查看已连接的设备
-bluetoothctl devices Connected
-
-# 查看 rfcomm 绑定
-rfcomm -a
-
-# 查看串口权限
-ls -l /dev/rfcomm0
-
-# 删除配对（出问题时重来）
-bluetoothctl remove 4B:63:DA:3A:2C:DB
-
-# 查看蓝牙状态
-bluetoothctl show
-```
+| 现象 | 处理 |
+|---|---|
+| Scan 找不到设备 | 模块重新上电后马上 Scan；或使用 cached Connect |
+| cached Connect 失败 | 确认 Windows 已配对、没有其他程序占用、模块已上电 |
+| Raw Log 没有 `aa` | 检查 STM32 PA2/PA3 和模块 RXD/TXD 是否交叉 |
+| Raw Log 是 `80 78 f8 ...` | STM32 与模块 UART 波特率不一致，应为 `38400 8N1` |
+| 有 `aa 01 18 ... 55` 但 Frames 不动 | 检查是否修改过 `bt_protocol.py` 或帧校验逻辑 |
+| 连接后无数据 | 确认固件已烧录新版，OLED 显示 `HC-05 USART2 38400` |
